@@ -419,3 +419,33 @@ body {
   letter-spacing: normal;
 }
 
+/* Modern mode select styling */
+[data-theme="normal"] select {
+  color: #1f2937 !important;
+  background-color: white !important;
+}
+
+[data-theme="normal"] select option {
+  color: #1f2937 !important;
+  background-color: white !important;
+}
+
+/* Retro theme select styling */
+[data-theme="green-phosphor"] select,
+[data-theme="amber-terminal"] select,
+[data-theme="blue-screen"] select,
+[data-theme="apple-ii"] select,
+[data-theme="matrix"] select {
+  color: var(--terminal-text);
+  background-color: var(--terminal-bg);
+}
+
+[data-theme="green-phosphor"] select option,
+[data-theme="amber-terminal"] select option,
+[data-theme="blue-screen"] select option,
+[data-theme="apple-ii"] select option,
+[data-theme="matrix"] select option {
+  color: var(--terminal-text);
+  background-color: var(--terminal-bg);
+}
+

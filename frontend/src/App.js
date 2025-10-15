@@ -144,7 +144,7 @@ function App() {
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           {/* Theme Selector */}
           <div className="flex items-center gap-2">
-            <label className={`text-sm font-bold ${isRetroTheme ? 'terminal-text uppercase tracking-wider' : ''}`}>
+            <label className={`text-sm font-bold ${isRetroTheme ? 'terminal-text uppercase tracking-wider' : 'text-gray-700'}`}>
               {isRetroTheme ? 'THEME:' : 'Theme:'}
             </label>
             <select
@@ -153,11 +153,11 @@ function App() {
               className={`px-3 py-2 font-bold text-sm transition-all cursor-pointer ${
                 isRetroTheme 
                   ? 'terminal-button bg-black' 
-                  : 'bg-white border-2 border-gray-300 rounded hover:border-primary'
+                  : 'bg-white text-gray-900 border-2 border-gray-300 rounded hover:border-primary focus:border-primary focus:outline-none'
               }`}
             >
               {themes.map(t => (
-                <option key={t.id} value={t.id}>
+                <option key={t.id} value={t.id} className={isRetroTheme ? '' : 'text-gray-900 bg-white'}>
                   {t.name} - {t.desc}
                 </option>
               ))}
