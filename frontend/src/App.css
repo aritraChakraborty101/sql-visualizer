@@ -282,7 +282,7 @@ body {
 .terminal-text {
   color: var(--terminal-text);
   font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
-  text-shadow: 0 0 5px var(--terminal-glow);
+  text-shadow: 0 0 1px var(--terminal-glow);
   letter-spacing: 0.05em;
 }
 
@@ -293,9 +293,8 @@ body {
 /* Glow Effect */
 .text-glow {
   text-shadow: 
-    0 0 5px var(--terminal-glow),
-    0 0 10px var(--terminal-glow),
-    0 0 15px var(--terminal-glow);
+    0 0 2px var(--terminal-glow),
+    0 0 3px var(--terminal-glow);
 }
 
 [data-theme="normal"] .text-glow {
