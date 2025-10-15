@@ -45,13 +45,13 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>SQL Query Execution Visualizer</h1>
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-secondary text-white py-5 px-5 text-center shadow-md">
+        <h1 className="text-3xl font-semibold">SQL Query Execution Visualizer</h1>
       </header>
       
-      <div className="main-container">
-        <div className="left-panel">
+      <div className="max-w-[1800px] mx-auto p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5">
           <SchemaViewer />
           <SqlEditor 
             query={query} 
@@ -59,10 +59,14 @@ function App() {
             onRun={handleRunQuery}
             loading={loading}
           />
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="bg-red-50 text-red-700 px-4 py-3 rounded border-l-4 border-red-700">
+              {error}
+            </div>
+          )}
         </div>
         
-        <div className="right-panel">
+        <div className="flex flex-col gap-5">
           <Visualization steps={visualizationSteps} />
           <ResultsTable results={results} />
         </div>
