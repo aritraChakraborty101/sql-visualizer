@@ -4,6 +4,8 @@ import sqlite3
 import sqlglot
 from sqlglot import exp
 from typing import List, Dict, Any, Optional
+import json
+from linter import analyze_query, get_query_complexity_score
 
 app = Flask(__name__)
 CORS(app)
@@ -366,8 +368,15 @@ def run_query():
         data = request.get_json()
         query = data.get('query', '').strip()
         
+        # Remove SQL comments from the beginning to check for SELECT
+        query_check = query
+        # Remove single-line comments
+        while query_check.lstrip().startswith('--'):
+            query_check = query_check.split('\n', 1)[1] if '\n' in query_check else ''
+        query_check = query_check.strip()
+        
         # Security check: only allow SELECT queries
-        if not query.upper().startswith('SELECT'):
+        if not query_check.upper().startswith('SELECT'):
             return jsonify({
                 'error': 'Only SELECT queries are allowed. Please start your query with SELECT.'
             }), 400
@@ -411,13 +420,21 @@ def run_query():
                     'error': f'Database Error: {error_msg}'
                 }), 400
         
+        # Analyze query for tips
+        tips = analyze_query(query)
+        
+        # Get complexity score
+        complexity = get_query_complexity_score(query)
+        
         # Format response
         response = {
             'results': {
                 'columns': columns,
                 'rows': rows
             },
-            'visualization': visualization
+            'visualization': visualization,
+            'tips': tips,
+            'complexity': complexity
         }
         
         return jsonify(response), 200
@@ -457,6 +474,120 @@ def get_schema():
         conn.close()
         return jsonify(schema), 200
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/curriculum', methods=['GET'])
+def get_curriculum():
+    """Return the learning curriculum"""
+    try:
+        with open('curriculum.json', 'r') as f:
+            curriculum = json.load(f)
+        return jsonify(curriculum), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'Curriculum file not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def get_lesson_by_id(lesson_id: str) -> Optional[Dict]:
+    """Find a lesson by its ID in the curriculum"""
+    try:
+        with open('curriculum.json', 'r') as f:
+            curriculum = json.load(f)
+        
+        for module in curriculum['modules']:
+            for lesson in module['lessons']:
+                if lesson['id'] == lesson_id:
+                    return lesson
+        return None
+    except:
+        return None
+
+def normalize_query_results(rows):
+    """Normalize query results for comparison"""
+    # Convert to list of tuples and sort for consistent comparison
+    normalized = [tuple(row) for row in rows]
+    return sorted(normalized)
+
+@app.route('/api/validate', methods=['POST'])
+def validate_challenge():
+    """Validate a user's query against a lesson's solution"""
+    try:
+        data = request.get_json()
+        user_query = data.get('query', '').strip()
+        lesson_id = data.get('lesson_id')
+        
+        if not user_query or not lesson_id:
+            return jsonify({'error': 'Missing query or lesson_id'}), 400
+        
+        # Get the lesson
+        lesson = get_lesson_by_id(lesson_id)
+        if not lesson:
+            return jsonify({'error': 'Lesson not found'}), 404
+        
+        # Remove SQL comments from the beginning to check for SELECT
+        query_check = user_query
+        # Remove single-line comments
+        while query_check.lstrip().startswith('--'):
+            query_check = query_check.split('\n', 1)[1] if '\n' in query_check else ''
+        query_check = query_check.strip()
+        
+        # Security check
+        if not query_check.upper().startswith('SELECT'):
+            return jsonify({
+                'is_correct': False,
+                'feedback': 'Only SELECT queries are allowed.'
+            }), 200
+        
+        try:
+            # Execute user's query
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute(user_query)
+            user_columns = [description[0] for description in cursor.description]
+            user_results = cursor.fetchall()
+            user_results_normalized = normalize_query_results(user_results)
+            
+            # Execute solution query
+            cursor.execute(lesson['solution_query'])
+            solution_columns = [description[0] for description in cursor.description]
+            solution_results = cursor.fetchall()
+            solution_results_normalized = normalize_query_results(solution_results)
+            
+            conn.close()
+            
+            # Compare results
+            columns_match = user_columns == solution_columns
+            results_match = user_results_normalized == solution_results_normalized
+            
+            is_correct = columns_match and results_match
+            
+            if is_correct:
+                feedback = "🎉 Correct! Well done! You can move on to the next lesson."
+            elif not columns_match:
+                feedback = f"The columns don't match. Expected: {', '.join(solution_columns)}, but got: {', '.join(user_columns)}. Check your SELECT clause."
+            else:
+                feedback = f"The results don't match the expected output. You got {len(user_results)} rows, expected {len(solution_results)} rows. Check your WHERE, JOIN, or GROUP BY clauses."
+            
+            return jsonify({
+                'is_correct': is_correct,
+                'feedback': feedback,
+                'user_row_count': len(user_results),
+                'expected_row_count': len(solution_results)
+            }), 200
+            
+        except sqlite3.Error as e:
+            return jsonify({
+                'is_correct': False,
+                'feedback': f'Database Error: {str(e)}. Check your query syntax and table/column names.'
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'is_correct': False,
+                'feedback': f'Error executing query: {str(e)}'
+            }), 200
+            
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

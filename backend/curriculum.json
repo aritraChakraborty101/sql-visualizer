@@ -1,0 +1,149 @@
+{
+  "modules": [
+    {
+      "id": "mod-01",
+      "title": "SQL Basics: Querying Data",
+      "description": "Learn the fundamentals of retrieving data from tables",
+      "lessons": [
+        {
+          "id": "l-01-01",
+          "title": "Selecting All Data",
+          "objective": "Write a query to select all columns and all rows from the 'employees' table.",
+          "explanation": "The `SELECT *` statement is the simplest way to retrieve all data from a table. The asterisk (*) is a wildcard that means 'all columns'. This is useful for exploring data, but in production code, it's better to explicitly list the columns you need.",
+          "pre_filled_query": "SELECT * FROM employees;",
+          "solution_query": "SELECT * FROM employees;",
+          "hint": "Use SELECT followed by * and then specify the table name after FROM."
+        },
+        {
+          "id": "l-01-02",
+          "title": "Selecting Specific Columns",
+          "objective": "Get a list of just the names and salaries of all employees.",
+          "explanation": "To select specific columns, list their names after the SELECT keyword, separated by commas. This is more efficient than SELECT * because the database only retrieves the data you actually need.",
+          "pre_filled_query": "SELECT name, salary FROM employees;",
+          "solution_query": "SELECT name, salary FROM employees;",
+          "hint": "List the column names (name and salary) separated by a comma after SELECT."
+        },
+        {
+          "id": "l-01-03",
+          "title": "Filtering with WHERE",
+          "objective": "Find all employees who earn more than $80,000.",
+          "explanation": "The WHERE clause is used to filter records. It extracts only those records that fulfill a specified condition. You can use comparison operators like >, <, =, >=, <=, and != to create conditions.",
+          "pre_filled_query": "-- Your query here\nSELECT * FROM employees WHERE",
+          "solution_query": "SELECT * FROM employees WHERE salary > 80000;",
+          "hint": "Use WHERE salary > 80000 to filter employees with high salaries."
+        },
+        {
+          "id": "l-01-04",
+          "title": "Sorting Results",
+          "objective": "Get all employees ordered by their salary from highest to lowest.",
+          "explanation": "The ORDER BY clause is used to sort the result set. By default, it sorts in ascending order (ASC). Use DESC to sort in descending order.",
+          "pre_filled_query": "-- Your query here\nSELECT * FROM employees",
+          "solution_query": "SELECT * FROM employees ORDER BY salary DESC;",
+          "hint": "Use ORDER BY salary DESC to sort from highest to lowest."
+        },
+        {
+          "id": "l-01-05",
+          "title": "Combining WHERE and ORDER BY",
+          "objective": "Find employees with salary > 70000, ordered by name alphabetically.",
+          "explanation": "You can combine WHERE and ORDER BY in the same query. The WHERE clause always comes before ORDER BY. SQL processes WHERE first (to filter), then ORDER BY (to sort).",
+          "pre_filled_query": "-- Your query here\n",
+          "solution_query": "SELECT * FROM employees WHERE salary > 70000 ORDER BY name;",
+          "hint": "Combine WHERE salary > 70000 and ORDER BY name (ASC is the default)."
+        }
+      ]
+    },
+    {
+      "id": "mod-02",
+      "title": "Joining Tables",
+      "description": "Learn how to combine data from multiple related tables",
+      "lessons": [
+        {
+          "id": "l-02-01",
+          "title": "Understanding INNER JOIN",
+          "objective": "Join employees and departments to show each employee with their department name.",
+          "explanation": "INNER JOIN combines rows from two tables based on a related column. It only returns rows where there's a match in both tables. The ON clause specifies the join condition.",
+          "pre_filled_query": "-- Your query here\nSELECT e.name, d.name as department\nFROM employees e\nINNER JOIN departments d",
+          "solution_query": "SELECT e.name, d.name as department FROM employees e INNER JOIN departments d ON e.department_id = d.id;",
+          "hint": "Use ON e.department_id = d.id to specify how the tables are related."
+        },
+        {
+          "id": "l-02-02",
+          "title": "LEFT JOIN for All Employees",
+          "objective": "Show all employees with their department names, including employees without a department.",
+          "explanation": "LEFT JOIN returns all rows from the left table (employees), and matching rows from the right table (departments). When there's no match, NULL values appear for the right table's columns.",
+          "pre_filled_query": "-- Your query here\nSELECT e.name, d.name as department\nFROM employees e",
+          "solution_query": "SELECT e.name, d.name as department FROM employees e LEFT JOIN departments d ON e.department_id = d.id;",
+          "hint": "Use LEFT JOIN instead of INNER JOIN to include all employees, even those without a department."
+        },
+        {
+          "id": "l-02-03",
+          "title": "Filtering Joined Data",
+          "objective": "Find employees in the 'Engineering' department with their department location.",
+          "explanation": "You can use WHERE clause after a JOIN to filter the combined results. You can reference columns from either table in the WHERE clause.",
+          "pre_filled_query": "-- Your query here\nSELECT e.name, d.name as department, d.location\nFROM employees e\nINNER JOIN departments d ON e.department_id = d.id",
+          "solution_query": "SELECT e.name, d.name as department, d.location FROM employees e INNER JOIN departments d ON e.department_id = d.id WHERE d.name = 'Engineering';",
+          "hint": "Add WHERE d.name = 'Engineering' to filter for the Engineering department."
+        }
+      ]
+    },
+    {
+      "id": "mod-03",
+      "title": "Aggregation and Grouping",
+      "description": "Learn to summarize and analyze data using aggregate functions",
+      "lessons": [
+        {
+          "id": "l-03-01",
+          "title": "Counting Rows",
+          "objective": "Count how many employees are in the database.",
+          "explanation": "COUNT(*) is an aggregate function that counts the number of rows. Aggregate functions perform calculations on a set of values and return a single value.",
+          "pre_filled_query": "-- Your query here\nSELECT COUNT(*) as total_employees FROM employees;",
+          "solution_query": "SELECT COUNT(*) as total_employees FROM employees;",
+          "hint": "Use COUNT(*) to count all rows in the employees table."
+        },
+        {
+          "id": "l-03-02",
+          "title": "GROUP BY Basics",
+          "objective": "Count how many employees are in each department.",
+          "explanation": "GROUP BY groups rows with the same values into summary rows. When you use GROUP BY, you can apply aggregate functions (COUNT, SUM, AVG, etc.) to each group.",
+          "pre_filled_query": "-- Your query here\nSELECT d.name, COUNT(*) as emp_count\nFROM employees e\nJOIN departments d ON e.department_id = d.id",
+          "solution_query": "SELECT d.name, COUNT(*) as emp_count FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name;",
+          "hint": "Add GROUP BY d.name at the end to group employees by department."
+        },
+        {
+          "id": "l-03-03",
+          "title": "Multiple Aggregates",
+          "objective": "For each department, show the count of employees and average salary.",
+          "explanation": "You can use multiple aggregate functions in the same query. Each function calculates a different summary statistic for each group.",
+          "pre_filled_query": "-- Your query here\nSELECT d.name",
+          "solution_query": "SELECT d.name, COUNT(*) as emp_count, AVG(e.salary) as avg_salary FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name;",
+          "hint": "Use COUNT(*) for employee count and AVG(e.salary) for average salary."
+        },
+        {
+          "id": "l-03-04",
+          "title": "Filtering Groups with HAVING",
+          "objective": "Find departments that have more than one employee.",
+          "explanation": "HAVING is like WHERE, but it filters groups (after GROUP BY) rather than individual rows. Use WHERE to filter before grouping, and HAVING to filter after grouping.",
+          "pre_filled_query": "-- Your query here\nSELECT d.name, COUNT(*) as emp_count\nFROM employees e\nJOIN departments d ON e.department_id = d.id\nGROUP BY d.name",
+          "solution_query": "SELECT d.name, COUNT(*) as emp_count FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name HAVING COUNT(*) > 1;",
+          "hint": "Add HAVING COUNT(*) > 1 after GROUP BY to filter groups."
+        }
+      ]
+    },
+    {
+      "id": "mod-04",
+      "title": "Advanced Challenges",
+      "description": "Put your skills together with complex real-world queries",
+      "lessons": [
+        {
+          "id": "l-04-01",
+          "title": "Complex Analysis",
+          "objective": "Find departments in New York with average salary above $85,000, showing department name, location, employee count, and average salary, ordered by average salary descending.",
+          "explanation": "This combines JOIN, WHERE, GROUP BY, HAVING, and ORDER BY. Remember the execution order: FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → ORDER BY.",
+          "pre_filled_query": "-- Your query here\n",
+          "solution_query": "SELECT d.name, d.location, COUNT(*) as emp_count, AVG(e.salary) as avg_salary FROM employees e JOIN departments d ON e.department_id = d.id WHERE d.location = 'New York' GROUP BY d.name, d.location HAVING AVG(e.salary) > 85000 ORDER BY avg_salary DESC;",
+          "hint": "Start with JOIN, use WHERE for location, GROUP BY for aggregation, HAVING for filtering groups, and ORDER BY for sorting."
+        }
+      ]
+    }
+  ]
+}
