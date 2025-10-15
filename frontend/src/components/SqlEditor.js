@@ -12,12 +12,12 @@ const SqlEditor = ({ query, setQuery, onRun, loading }) => {
   ];
 
   const queryDescriptions = [
-    'Basic SELECT - Get all employees',
-    'WHERE Clause - Filter by salary',
-    'INNER JOIN - Employees with departments',
-    'LEFT JOIN + WHERE + ORDER BY - Complex query',
-    'GROUP BY with Aggregates - Count and average by department',
-    'GROUP BY + HAVING - Departments with multiple employees'
+    '01: BASIC SELECT',
+    '02: WHERE FILTER',
+    '03: INNER JOIN',
+    '04: COMPLEX QUERY',
+    '05: AGGREGATES',
+    '06: HAVING CLAUSE'
   ];
 
   const handleEditorChange = (value) => {
@@ -33,12 +33,12 @@ const SqlEditor = ({ query, setQuery, onRun, loading }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-5">
-      <h2 className="text-xl font-semibold mb-4 text-secondary border-b-2 border-primary pb-2">
-        SQL Query Editor
+    <div className="crt-container rounded-lg p-5 relative overflow-hidden">
+      <h2 className="text-xl font-bold mb-4 terminal-text text-glow border-b-2 border-green-500 pb-2 uppercase tracking-wider">
+        &gt;&gt; SQL QUERY EDITOR
       </h2>
       <div 
-        className="border-2 border-gray-300 rounded overflow-hidden mb-3" 
+        className="border-2 border-green-500 rounded overflow-hidden mb-3 shadow-[0_0_10px_rgba(0,255,0,0.3)]" 
         onKeyDown={handleKeyDown}
       >
         <Editor
@@ -64,28 +64,33 @@ const SqlEditor = ({ query, setQuery, onRun, loading }) => {
         <button 
           onClick={onRun} 
           disabled={loading}
-          className="flex items-center gap-3 bg-primary hover:bg-cyan-400 text-secondary px-6 py-3 rounded font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="terminal-button flex items-center gap-3"
         >
-          <span>{loading ? 'Executing...' : 'Run Query'}</span>
-          <span className="text-xs opacity-70 font-normal bg-black bg-opacity-10 px-1.5 py-0.5 rounded">
-            Ctrl+Enter
-          </span>
+          <span>{loading ? 'EXECUTING...' : '[[ RUN QUERY ]]'}</span>
+          {!loading && (
+            <span className="text-xs opacity-70 font-normal border border-green-700 px-1.5 py-0.5">
+              CTRL+ENTER
+            </span>
+          )}
+          {loading && <span className="cursor-blink">▊</span>}
         </button>
       </div>
       
-      <div className="mt-3 p-3 bg-gray-50 rounded">
-        <h4 className="text-sm mb-2 text-gray-600 font-semibold">Sample Queries (click to load):</h4>
+      <div className="mt-3 p-3 border border-green-700 rounded bg-black bg-opacity-40">
+        <h4 className="text-sm mb-2 terminal-text font-bold uppercase tracking-wide">
+          &gt; SAMPLE QUERIES [CLICK TO LOAD]:
+        </h4>
         <div className="space-y-1.5">
           {sampleQueries.map((q, index) => (
             <button 
               key={index} 
               onClick={() => setQuery(q)}
-              className="block w-full text-left px-3 py-2 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-primary transition-colors"
+              className="block w-full text-left px-3 py-2 border border-green-700 bg-black bg-opacity-60 hover:bg-green-900 hover:bg-opacity-30 hover:border-green-500 transition-all"
             >
-              <div className="font-semibold text-xs text-gray-700 mb-1">
+              <div className="font-bold text-xs terminal-text mb-1">
                 {queryDescriptions[index]}
               </div>
-              <div className="font-mono text-xs text-gray-600">
+              <div className="font-mono text-xs text-green-500 opacity-80">
                 {q}
               </div>
             </button>

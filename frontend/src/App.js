@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import SchemaViewer from './components/SchemaViewer';
 import SqlEditor from './components/SqlEditor';
@@ -22,6 +22,26 @@ function App() {
   const [activeLesson, setActiveLesson] = useState(null);
   const [hintVisible, setHintVisible] = useState(false);
   const [validationFeedback, setValidationFeedback] = useState(null);
+
+  // Theme state
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('sqlVisTheme') || 'green-phosphor';
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sqlVisTheme', theme);
+  }, [theme]);
+
+  const themes = [
+    { id: 'green-phosphor', name: '🟢 Green Phosphor', desc: 'Classic CRT' },
+    { id: 'amber-terminal', name: '🟠 Amber Terminal', desc: 'Vintage Unix' },
+    { id: 'blue-screen', name: '🔵 Blue Screen', desc: 'IBM Terminal' },
+    { id: 'apple-ii', name: '🍏 Apple II', desc: 'Retro Apple' },
+    { id: 'matrix', name: '💚 Matrix', desc: 'Digital Rain' },
+    { id: 'normal', name: '⚪ Modern Mode', desc: 'Clean & Bright' }
+  ];
 
   const handleRunQuery = async () => {
     setError('');
@@ -100,22 +120,75 @@ function App() {
     }
   };
 
+  const isRetroTheme = theme !== 'normal';
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-secondary text-white py-5 px-5 text-center shadow-md">
-        <h1 className="text-3xl font-semibold">SQL Query Execution Visualizer</h1>
-        <div className="mt-2">
+    <div className={`min-h-screen ${isRetroTheme ? 'bg-black' : 'bg-gray-100'}`}>
+      <header className={isRetroTheme ? 'terminal-header py-5 px-5 text-center' : 'bg-secondary text-white py-5 px-5 text-center shadow-md'}>
+        {isRetroTheme ? (
+          <>
+            <h1 className="text-3xl font-bold text-glow tracking-widest mb-1">
+              ╔═══════════════════════════════════════════════════╗
+            </h1>
+            <h1 className="text-3xl font-bold text-glow tracking-widest">
+              ║  SQL QUERY EXECUTION VISUALIZER v1.0  ║
+            </h1>
+            <h1 className="text-3xl font-bold text-glow tracking-widest mt-1">
+              ╚═══════════════════════════════════════════════════╝
+            </h1>
+          </>
+        ) : (
+          <h1 className="text-3xl font-semibold">SQL Query Execution Visualizer</h1>
+        )}
+        
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {/* Theme Selector */}
+          <div className="flex items-center gap-2">
+            <label className={`text-sm font-bold ${isRetroTheme ? 'terminal-text uppercase tracking-wider' : ''}`}>
+              {isRetroTheme ? 'THEME:' : 'Theme:'}
+            </label>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className={`px-3 py-2 font-bold text-sm transition-all cursor-pointer ${
+                isRetroTheme 
+                  ? 'terminal-button bg-black' 
+                  : 'bg-white border-2 border-gray-300 rounded hover:border-primary'
+              }`}
+            >
+              {themes.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.name} - {t.desc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Lesson Mode Toggle */}
           <button
             onClick={toggleLessonMode}
-            className={`px-4 py-2 rounded font-semibold transition-colors ${
-              lessonMode
-                ? 'bg-yellow-500 hover:bg-yellow-600'
-                : 'bg-primary hover:bg-cyan-400 text-secondary'
+            className={`${
+              isRetroTheme 
+                ? `terminal-button ${lessonMode ? 'bg-green-500 text-black' : ''}` 
+                : `px-4 py-2 rounded font-semibold transition-colors ${
+                    lessonMode
+                      ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                      : 'bg-primary hover:bg-cyan-400 text-secondary'
+                  }`
             }`}
           >
-            {lessonMode ? '📖 Exit Lesson Mode' : '📚 Enter Lesson Mode'}
+            {isRetroTheme 
+              ? (lessonMode ? '[[ EXIT LESSON MODE ]]' : '[[ ENTER LESSON MODE ]]')
+              : (lessonMode ? '📖 Exit Lesson Mode' : '📚 Enter Lesson Mode')
+            }
           </button>
         </div>
+        
+        {isRetroTheme && (
+          <div className="mt-2 text-xs terminal-text opacity-70">
+            {lessonMode ? '&gt; TRAINING PROTOCOL ACTIVE' : '&gt; FREE QUERY MODE'}
+          </div>
+        )}
       </header>
       
       <div className="max-w-[1800px] mx-auto p-5">
@@ -127,6 +200,7 @@ function App() {
                 onLessonSelect={handleLessonSelect}
                 activeLesson={activeLesson}
                 onToggleLessons={toggleLessonMode}
+                isRetroTheme={isRetroTheme}
               />
             </div>
             
@@ -136,20 +210,34 @@ function App() {
                   lesson={activeLesson}
                   onShowHint={() => setHintVisible(!hintVisible)}
                   hintVisible={hintVisible}
+                  isRetroTheme={isRetroTheme}
                 />
               )}
               
               {validationFeedback && (
-                <div className={`p-4 rounded-lg border-2 ${
-                  validationFeedback.is_correct
-                    ? 'bg-green-50 border-green-500 text-green-800'
-                    : 'bg-orange-50 border-orange-500 text-orange-800'
-                }`}>
-                  <div className="font-bold text-lg mb-2">
-                    {validationFeedback.is_correct ? '✅ Correct!' : '❌ Not Quite'}
+                isRetroTheme ? (
+                  <div className={`p-4 border-2 crt-container ${
+                    validationFeedback.is_correct
+                      ? 'border-green-500'
+                      : 'border-yellow-500'
+                  }`}>
+                    <div className="font-bold text-lg mb-2 terminal-text text-glow uppercase">
+                      {validationFeedback.is_correct ? '[[ SUCCESS ]] ✓' : '[[ ERROR ]] ✗'}
+                    </div>
+                    <div className="terminal-text text-sm">&gt; {validationFeedback.feedback}</div>
                   </div>
-                  <div>{validationFeedback.feedback}</div>
-                </div>
+                ) : (
+                  <div className={`p-4 rounded-lg border-2 ${
+                    validationFeedback.is_correct
+                      ? 'bg-green-50 border-green-500 text-green-800'
+                      : 'bg-orange-50 border-orange-500 text-orange-800'
+                  }`}>
+                    <div className="font-bold text-lg mb-2">
+                      {validationFeedback.is_correct ? '✅ Correct!' : '❌ Not Quite'}
+                    </div>
+                    <div>{validationFeedback.feedback}</div>
+                  </div>
+                )
               )}
               
               <SqlEditor 
@@ -157,41 +245,59 @@ function App() {
                 setQuery={setQuery} 
                 onRun={handleRunQuery}
                 loading={loading}
+                isRetroTheme={isRetroTheme}
               />
               
               {error && (
-                <div className="bg-red-50 text-red-700 px-4 py-3 rounded border-l-4 border-red-700">
-                  {error}
-                </div>
+                isRetroTheme ? (
+                  <div className="crt-container border-2 border-red-500 px-4 py-3">
+                    <div className="terminal-text text-red-500">
+                      [[ ERROR ]] {error}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-red-50 text-red-700 px-4 py-3 rounded border-l-4 border-red-700">
+                    {error}
+                  </div>
+                )
               )}
               
-              {tips.length > 0 && <TipsPanel tips={tips} complexity={complexity} />}
-              <Visualization steps={visualizationSteps} />
-              <ResultsTable results={results} />
+              {tips.length > 0 && <TipsPanel tips={tips} complexity={complexity} isRetroTheme={isRetroTheme} />}
+              <Visualization steps={visualizationSteps} isRetroTheme={isRetroTheme} />
+              <ResultsTable results={results} isRetroTheme={isRetroTheme} />
             </div>
           </div>
         ) : (
           // Free Query Mode Layout
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="flex flex-col gap-5">
-              <SchemaViewer />
+              <SchemaViewer isRetroTheme={isRetroTheme} />
               <SqlEditor 
                 query={query} 
                 setQuery={setQuery} 
                 onRun={handleRunQuery}
                 loading={loading}
+                isRetroTheme={isRetroTheme}
               />
               {error && (
-                <div className="bg-red-50 text-red-700 px-4 py-3 rounded border-l-4 border-red-700">
-                  {error}
-                </div>
+                isRetroTheme ? (
+                  <div className="crt-container border-2 border-red-500 px-4 py-3">
+                    <div className="terminal-text text-red-500">
+                      [[ ERROR ]] {error}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-red-50 text-red-700 px-4 py-3 rounded border-l-4 border-red-700">
+                    {error}
+                  </div>
+                )
               )}
-              {tips.length > 0 && <TipsPanel tips={tips} complexity={complexity} />}
+              {tips.length > 0 && <TipsPanel tips={tips} complexity={complexity} isRetroTheme={isRetroTheme} />}
             </div>
             
             <div className="flex flex-col gap-5">
-              <Visualization steps={visualizationSteps} />
-              <ResultsTable results={results} />
+              <Visualization steps={visualizationSteps} isRetroTheme={isRetroTheme} />
+              <ResultsTable results={results} isRetroTheme={isRetroTheme} />
             </div>
           </div>
         )}
