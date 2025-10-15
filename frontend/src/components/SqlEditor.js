@@ -5,9 +5,19 @@ const SqlEditor = ({ query, setQuery, onRun, loading }) => {
   const sampleQueries = [
     'SELECT * FROM employees',
     'SELECT name, salary FROM employees WHERE salary > 80000',
-    'SELECT e.name, e.salary, d.name as department FROM employees e JOIN departments d ON e.department_id = d.id',
-    'SELECT d.name, COUNT(*) as emp_count FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name',
-    'SELECT * FROM employees ORDER BY salary DESC'
+    'SELECT e.name, e.salary, d.name as department FROM employees e INNER JOIN departments d ON e.department_id = d.id',
+    'SELECT e.name, e.salary, d.name as dept FROM employees e LEFT JOIN departments d ON e.department_id = d.id WHERE e.salary > 70000 ORDER BY e.salary DESC',
+    'SELECT d.name, COUNT(*) as emp_count, AVG(e.salary) as avg_salary FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name',
+    'SELECT d.name, COUNT(*) as count FROM employees e JOIN departments d ON e.department_id = d.id GROUP BY d.name HAVING COUNT(*) > 1'
+  ];
+
+  const queryDescriptions = [
+    'Basic SELECT - Get all employees',
+    'WHERE Clause - Filter by salary',
+    'INNER JOIN - Employees with departments',
+    'LEFT JOIN + WHERE + ORDER BY - Complex query',
+    'GROUP BY with Aggregates - Count and average by department',
+    'GROUP BY + HAVING - Departments with multiple employees'
   ];
 
   const handleEditorChange = (value) => {
@@ -64,15 +74,20 @@ const SqlEditor = ({ query, setQuery, onRun, loading }) => {
       </div>
       
       <div className="mt-3 p-3 bg-gray-50 rounded">
-        <h4 className="text-sm mb-2 text-gray-600">Sample Queries (click to load):</h4>
+        <h4 className="text-sm mb-2 text-gray-600 font-semibold">Sample Queries (click to load):</h4>
         <div className="space-y-1.5">
           {sampleQueries.map((q, index) => (
             <button 
               key={index} 
               onClick={() => setQuery(q)}
-              className="block w-full text-left px-3 py-2 bg-white border border-gray-300 rounded font-mono text-xs hover:bg-blue-50 hover:border-primary transition-colors"
+              className="block w-full text-left px-3 py-2 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-primary transition-colors"
             >
-              {q}
+              <div className="font-semibold text-xs text-gray-700 mb-1">
+                {queryDescriptions[index]}
+              </div>
+              <div className="font-mono text-xs text-gray-600">
+                {q}
+              </div>
             </button>
           ))}
         </div>
