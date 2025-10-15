@@ -11,9 +11,10 @@ app = Flask(__name__)
 CORS(app)
 
 DATABASE = 'employees.db'
+CASE_DATABASE = 'omnicorp_case.db'
 
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
+def get_db_connection(database=DATABASE):
+    conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -586,6 +587,289 @@ def validate_challenge():
             return jsonify({
                 'is_correct': False,
                 'feedback': f'Error executing query: {str(e)}'
+            }), 200
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/case/load', methods=['GET'])
+def load_case():
+    """Load the case file configuration"""
+    try:
+        with open('case_file.json', 'r') as f:
+            case_data = json.load(f)
+        return jsonify(case_data), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'Case file not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/case/schema', methods=['GET'])
+def get_case_schema():
+    """Return the case database schema"""
+    try:
+        conn = get_db_connection(CASE_DATABASE)
+        cursor = conn.cursor()
+        
+        schema = {}
+        
+        # Get all tables
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        
+        for table in tables:
+            table_name = table[0]
+            cursor.execute(f"PRAGMA table_info({table_name});")
+            columns = cursor.fetchall()
+            
+            schema[table_name] = [
+                {
+                    'name': col[1],
+                    'type': col[2],
+                    'pk': col[5] == 1
+                }
+                for col in columns
+            ]
+        
+        conn.close()
+        return jsonify(schema), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def validate_stage_result(user_result, validation_config):
+    """Validate user query results against stage requirements"""
+    user_columns, user_rows = user_result
+    validation_type = validation_config.get('type')
+    
+    if validation_type == 'exact_columns':
+        required_cols = validation_config.get('required_columns', [])
+        expected_data = validation_config.get('expected_data', [])
+        
+        # Check if required columns exist
+        for req_col in required_cols:
+            if req_col not in user_columns:
+                return False, f"Missing required column: {req_col}"
+        
+        # Check if data matches
+        if len(user_rows) != len(expected_data):
+            return False, f"Expected {len(expected_data)} row(s), got {len(user_rows)}"
+        
+        # Compare data values
+        for exp_row in expected_data:
+            found = False
+            for user_row in user_rows:
+                user_dict = dict(zip(user_columns, user_row))
+                match = all(user_dict.get(k) == v for k, v in exp_row.items())
+                if match:
+                    found = True
+                    break
+            if not found:
+                return False, f"Expected data not found in results"
+        
+        return True, "Correct!"
+    
+    elif validation_type == 'contains_ids':
+        required_cols = validation_config.get('required_columns', [])
+        expected_ids = validation_config.get('expected_employee_ids', [])
+        min_count = validation_config.get('min_count', 0)
+        
+        if 'employee_id' not in user_columns:
+            return False, "Query must return employee_id column"
+        
+        emp_id_idx = user_columns.index('employee_id')
+        found_ids = set(row[emp_id_idx] for row in user_rows)
+        
+        if len(found_ids) < min_count:
+            return False, f"Expected at least {min_count} employees, found {len(found_ids)}"
+        
+        for exp_id in expected_ids:
+            if exp_id not in found_ids:
+                return False, f"Missing expected employee ID: {exp_id}"
+        
+        return True, "All suspects identified!"
+    
+    elif validation_type == 'contains_names':
+        required_cols = validation_config.get('required_columns', [])
+        expected_names = validation_config.get('expected_names', [])
+        
+        if 'name' not in user_columns:
+            return False, "Query must return 'name' column"
+        
+        name_idx = user_columns.index('name')
+        found_names = set(row[name_idx] for row in user_rows)
+        
+        for exp_name in expected_names:
+            if exp_name not in found_names:
+                return False, f"Missing expected person: {exp_name}"
+        
+        return True, "Suspects identified correctly!"
+    
+    elif validation_type == 'exact_count_and_names':
+        required_cols = validation_config.get('required_columns', [])
+        expected_names = validation_config.get('expected_names', [])
+        expected_count = validation_config.get('expected_count', 0)
+        
+        if 'name' not in user_columns:
+            return False, "Query must return 'name' column"
+        
+        if len(user_rows) != expected_count:
+            return False, f"Expected exactly {expected_count} results, got {len(user_rows)}"
+        
+        name_idx = user_columns.index('name')
+        found_names = set(row[name_idx] for row in user_rows)
+        
+        for exp_name in expected_names:
+            if exp_name not in found_names:
+                return False, f"Missing expected person: {exp_name}"
+        
+        return True, "Correct capability analysis!"
+    
+    elif validation_type == 'ordered_sequence':
+        required_cols = validation_config.get('required_columns', [])
+        must_be_ordered = validation_config.get('must_be_ordered', False)
+        must_contain_action = validation_config.get('must_contain_action')
+        
+        for col in required_cols:
+            if col not in user_columns:
+                return False, f"Missing required column: {col}"
+        
+        if must_contain_action and 'action' in user_columns:
+            action_idx = user_columns.index('action')
+            actions = [row[action_idx] for row in user_rows]
+            if must_contain_action not in actions:
+                return False, f"Results must contain action: {must_contain_action}"
+        
+        if must_be_ordered and 'timestamp' in user_columns:
+            ts_idx = user_columns.index('timestamp')
+            timestamps = [row[ts_idx] for row in user_rows]
+            if timestamps != sorted(timestamps):
+                return False, "Results must be ordered by timestamp"
+        
+        return True, "Timeline constructed correctly!"
+    
+    elif validation_type == 'contains_text':
+        required_cols = validation_config.get('required_columns', [])
+        keywords = validation_config.get('must_contain_keywords', [])
+        min_results = validation_config.get('min_results', 1)
+        
+        if len(user_rows) < min_results:
+            return False, f"Expected at least {min_results} result(s)"
+        
+        # Check if any row contains the keywords
+        found_keyword = False
+        for row in user_rows:
+            row_text = ' '.join(str(val) for val in row)
+            if any(keyword in row_text for keyword in keywords):
+                found_keyword = True
+                break
+        
+        if not found_keyword:
+            return False, "Memo with relevant information not found"
+        
+        return True, "Motive discovered!"
+    
+    elif validation_type == 'final_report':
+        must_include_employee = validation_config.get('must_include_employee')
+        must_show_deletion = validation_config.get('must_show_deletion', False)
+        required_info = validation_config.get('required_info', [])
+        
+        # Check if employee 202 data is present
+        has_employee = False
+        has_deletion = False
+        
+        for row in user_rows:
+            row_str = ' '.join(str(val) for val in row)
+            if str(must_include_employee) in row_str or 'Marcus Vale' in row_str:
+                has_employee = True
+            if must_show_deletion and 'DELETED' in row_str:
+                has_deletion = True
+        
+        if not has_employee:
+            return False, f"Report must include data about employee {must_include_employee}"
+        
+        if must_show_deletion and not has_deletion:
+            return False, "Report must show the deletion action"
+        
+        return True, "Case solved! Evidence compiled successfully!"
+    
+    return False, "Validation type not recognized"
+
+@app.route('/api/case/solve', methods=['POST'])
+def solve_case_stage():
+    """Validate user's query for a specific case stage"""
+    try:
+        data = request.get_json()
+        user_query = data.get('query', '').strip()
+        stage_id = data.get('stage_id')
+        
+        if not user_query or not stage_id:
+            return jsonify({'error': 'Missing query or stage_id'}), 400
+        
+        # Load case file
+        with open('case_file.json', 'r') as f:
+            case_data = json.load(f)
+        
+        stage = case_data['stages'].get(stage_id)
+        if not stage:
+            return jsonify({'error': 'Stage not found'}), 404
+        
+        # Security check
+        query_check = user_query
+        while query_check.lstrip().startswith('--'):
+            query_check = query_check.split('\n', 1)[1] if '\n' in query_check else ''
+        query_check = query_check.strip()
+        
+        if not query_check.upper().startswith('SELECT'):
+            return jsonify({
+                'is_correct': False,
+                'feedback': 'Only SELECT queries are allowed.'
+            }), 200
+        
+        try:
+            # Execute user's query against case database
+            conn = get_db_connection(CASE_DATABASE)
+            cursor = conn.cursor()
+            
+            cursor.execute(user_query)
+            user_columns = [description[0] for description in cursor.description]
+            user_rows = cursor.fetchall()
+            user_rows_list = [list(row) for row in user_rows]
+            
+            conn.close()
+            
+            # Validate against stage requirements
+            validation = stage.get('validation', {})
+            is_correct, feedback = validate_stage_result(
+                (user_columns, user_rows_list),
+                validation
+            )
+            
+            response = {
+                'is_correct': is_correct,
+                'feedback': feedback,
+                'user_row_count': len(user_rows_list),
+            }
+            
+            if is_correct:
+                response['clue_unlocked'] = stage.get('clue_unlocked')
+                response['next_stage'] = stage.get('next_stage')
+                
+                # Check if this is the final stage
+                if stage_id == 'final_stage':
+                    response['completion_message'] = stage.get('completion_message')
+            
+            return jsonify(response), 200
+            
+        except sqlite3.Error as e:
+            return jsonify({
+                'is_correct': False,
+                'feedback': f'Database Error: {str(e)}. Check your query syntax.'
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'is_correct': False,
+                'feedback': f'Error: {str(e)}'
             }), 200
             
     except Exception as e:

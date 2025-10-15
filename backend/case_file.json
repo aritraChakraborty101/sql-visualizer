@@ -1,0 +1,142 @@
+{
+  "case_id": "case_001",
+  "title": "The Case of the Corrupted Mainframe",
+  "year": "1988",
+  "client": "OmniCorp Industries",
+  "database": "omnicorp_case.db",
+  "intro_narrative": ">>> INCOMING TRANSMISSION <<<\n\nDetective, this is CEO Arthur Sterling of OmniCorp Industries. Last night, our revolutionary Project Chimera was sabotaged. The mainframe's kernel was corrupted at 0215 hours. I've granted you Level 5 clearance to our system logs.\n\nYour mission: Find WHO did this, HOW they did it, and WHY.\n\nThe evidence is in the data. Time to get to work.\n\n>>> END TRANSMISSION <<<",
+  "stages": {
+    "stage_1": {
+      "id": "stage_1",
+      "title": "The Crime Scene",
+      "narrative": "Your first task: identify the exact file that was tampered with. Our logs show a single file was DELETED from the system on March 15th, 1988. You need the filename and the precise timestamp of deletion.",
+      "objective": "Find the deleted file from the `file_changelogs` table on '1988-03-15'",
+      "hint": "Look for records where action = 'DELETED' on the date of the incident",
+      "schema_hint": "Tables available: file_changelogs (change_id, timestamp, employee_id, filename, action)",
+      "validation": {
+        "type": "exact_columns",
+        "required_columns": ["filename", "timestamp"],
+        "expected_data": [
+          {"filename": "chimera_kernel.c", "timestamp": "1988-03-15 02:15:30"}
+        ],
+        "tolerance": "exact"
+      },
+      "clue_unlocked": "DELETION: chimera_kernel.c at 02:15:30 AM",
+      "next_stage": "stage_2"
+    },
+    "stage_2": {
+      "id": "stage_2",
+      "title": "The Suspects",
+      "narrative": "02:15 AM. Classic witching-hour attack. Now we need suspects. Who had physical access to the Mainframe Room around the time of deletion? Check the security logs for anyone who logged into the 'Mainframe Room' between 02:00 and 02:30 on March 15th.",
+      "objective": "Query `security_logs` for all employees who accessed the 'Mainframe Room' in the 30-minute window",
+      "hint": "Filter by location and time range. You'll need to compare timestamps.",
+      "schema_hint": "Tables: security_logs (log_id, employee_id, access_time, location, action)",
+      "validation": {
+        "type": "contains_ids",
+        "required_columns": ["employee_id"],
+        "expected_employee_ids": [202, 103, 105],
+        "min_count": 3
+      },
+      "clue_unlocked": "SUSPECTS: Employees #202, #103, and #105 were in the Mainframe Room",
+      "next_stage": "stage_3"
+    },
+    "stage_3": {
+      "id": "stage_3",
+      "title": "Identity Check",
+      "narrative": "Three suspects in the room. Time to put names to numbers. Cross-reference those employee IDs with the personnel database. I need their names, job titles, and security clearance levels.",
+      "objective": "JOIN the employee data to identify the three suspects by name",
+      "hint": "Use a JOIN or WHERE IN clause to get employee details for IDs 202, 103, and 105",
+      "schema_hint": "Tables: employees (id, name, job_title, current_project, security_clearance)",
+      "validation": {
+        "type": "contains_names",
+        "required_columns": ["name", "job_title"],
+        "expected_names": ["Marcus Vale", "Charlie Ross", "Edward Price"]
+      },
+      "clue_unlocked": "IDENTIFIED: Marcus Vale (Senior Dev), Charlie Ross (Intern), Edward Price (DB Admin)",
+      "next_stage": "stage_4"
+    },
+    "stage_4": {
+      "id": "stage_4",
+      "title": "The Capability Question",
+      "narrative": "An intern with clearance level 2 couldn't delete a Level 5 file. Let's narrow it down: which of our three suspects had the security clearance (Level 4 or higher) to delete critical files?",
+      "objective": "Filter suspects by security clearance level >= 4",
+      "hint": "From your three suspects, find those with security_clearance >= 4",
+      "schema_hint": "Use the employees table with a WHERE clause",
+      "validation": {
+        "type": "exact_count_and_names",
+        "required_columns": ["name", "security_clearance"],
+        "expected_names": ["Marcus Vale", "Edward Price"],
+        "expected_count": 2
+      },
+      "clue_unlocked": "CAPABILITY: Only Marcus Vale and Edward Price had sufficient clearance",
+      "next_stage": "stage_5"
+    },
+    "stage_5": {
+      "id": "stage_5",
+      "title": "The Timeline",
+      "narrative": "We're down to two. Now let's examine the exact sequence. Pull the complete timeline: all file actions by Marcus Vale (ID: 202) and Edward Price (ID: 105) on March 15th, ordered chronologically.",
+      "objective": "Get all file_changelogs entries for employees 202 and 105 on 1988-03-15, ordered by time",
+      "hint": "Filter by date and employee_id, then ORDER BY timestamp",
+      "schema_hint": "SELECT from file_changelogs WHERE employee_id IN (202, 105) AND date matches",
+      "validation": {
+        "type": "ordered_sequence",
+        "required_columns": ["timestamp", "employee_id", "filename", "action"],
+        "must_be_ordered": true,
+        "must_contain_action": "DELETED"
+      },
+      "clue_unlocked": "TIMELINE: Marcus Vale deleted the file. Edward Price modified a backup afterwards.",
+      "next_stage": "stage_6"
+    },
+    "stage_6": {
+      "id": "stage_6",
+      "title": "The Motive",
+      "narrative": "The evidence points to Marcus Vale. But we need motive. Check the company memos for any information about employee #202. There might be something that explains why he did this.",
+      "objective": "Search the memos table for any reference to Marcus Vale or employee behavior",
+      "hint": "Look for memos that might contain clues about Vale's state of mind or recent events",
+      "schema_hint": "Tables: memos (memo_id, memo_date, memo_text)",
+      "validation": {
+        "type": "contains_text",
+        "required_columns": ["memo_text"],
+        "must_contain_keywords": ["Marcus Vale", "202"],
+        "min_results": 1
+      },
+      "clue_unlocked": "MOTIVE: Vale was passed over for promotion. Also had prior security violations.",
+      "next_stage": "final_stage"
+    },
+    "final_stage": {
+      "id": "final_stage",
+      "title": "The Final Report",
+      "narrative": "You've assembled all the pieces. Now compile your final report. Query ALL relevant information about Marcus Vale: his employee record, his file actions on March 15th, and his security log entries during the incident window. This is the evidence package for prosecution.",
+      "objective": "Create a comprehensive query joining employee data, security logs, and file changelogs for Marcus Vale",
+      "hint": "You may need to use multiple JOINs or UNION to gather all evidence about employee_id 202",
+      "schema_hint": "Combine data from employees, security_logs, and file_changelogs",
+      "validation": {
+        "type": "final_report",
+        "must_include_employee": 202,
+        "must_show_deletion": true,
+        "required_info": ["name", "security_clearance", "DELETED"]
+      },
+      "clue_unlocked": "CASE CLOSED: Marcus Vale - Motive, Means, and Opportunity confirmed.",
+      "next_stage": null,
+      "completion_message": ">>> CASE SOLVED <<<\n\nOutstanding work, Detective. The evidence is irrefutable:\n\nCULPRIT: Marcus Vale (Employee #202)\nCRIME: Deletion of chimera_kernel.c at 02:15:30 AM\nMOTIVE: Resentment over being passed for promotion\nEVIDENCE: Security logs place him at the scene, file logs show the deletion, and prior violations establish a pattern.\n\nMr. Sterling has been notified. OmniCorp Security is moving to apprehend Vale.\n\nYour fee has been transferred. Well done.\n\n>>> TRANSMISSION END <<<"
+    }
+  },
+  "schema": {
+    "employees": {
+      "columns": ["id", "name", "job_title", "current_project", "security_clearance"],
+      "description": "Personnel records for all OmniCorp employees"
+    },
+    "security_logs": {
+      "columns": ["log_id", "employee_id", "access_time", "location", "action"],
+      "description": "Physical access logs from security system"
+    },
+    "file_changelogs": {
+      "columns": ["change_id", "timestamp", "employee_id", "filename", "action"],
+      "description": "File system modification logs from mainframe"
+    },
+    "memos": {
+      "columns": ["memo_id", "memo_date", "memo_text"],
+      "description": "Internal company communications and notices"
+    }
+  }
+}

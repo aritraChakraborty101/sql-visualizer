@@ -7,6 +7,7 @@ import ResultsTable from './components/ResultsTable';
 import TipsPanel from './components/TipsPanel';
 import LessonsSidebar from './components/LessonsSidebar';
 import LessonPanel from './components/LessonPanel';
+import DataDetective from './components/DataDetective';
 
 function App() {
   const [query, setQuery] = useState('SELECT * FROM employees');
@@ -22,6 +23,9 @@ function App() {
   const [activeLesson, setActiveLesson] = useState(null);
   const [hintVisible, setHintVisible] = useState(false);
   const [validationFeedback, setValidationFeedback] = useState(null);
+  
+  // Data Detective mode state
+  const [detectiveMode, setDetectiveMode] = useState(false);
 
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -113,6 +117,7 @@ function App() {
 
   const toggleLessonMode = () => {
     setLessonMode(!lessonMode);
+    setDetectiveMode(false);
     if (!lessonMode) {
       setActiveLesson(null);
       setValidationFeedback(null);
@@ -120,7 +125,19 @@ function App() {
     }
   };
 
+  const toggleDetectiveMode = () => {
+    setDetectiveMode(!detectiveMode);
+    setLessonMode(false);
+    setActiveLesson(null);
+    setValidationFeedback(null);
+  };
+
   const isRetroTheme = theme !== 'normal';
+
+  // If in detective mode, show the Data Detective interface
+  if (detectiveMode) {
+    return <DataDetective theme={theme} onExit={() => setDetectiveMode(false)} />;
+  }
 
   return (
     <div className={`min-h-screen ${isRetroTheme ? 'bg-black' : 'bg-gray-100'}`}>
@@ -180,6 +197,21 @@ function App() {
             {isRetroTheme 
               ? (lessonMode ? '[[ EXIT LESSON MODE ]]' : '[[ ENTER LESSON MODE ]]')
               : (lessonMode ? '📖 Exit Lesson Mode' : '📚 Enter Lesson Mode')
+            }
+          </button>
+
+          {/* Data Detective Mode Toggle */}
+          <button
+            onClick={toggleDetectiveMode}
+            className={`${
+              isRetroTheme 
+                ? 'terminal-button' 
+                : 'px-4 py-2 rounded font-semibold transition-colors bg-purple-600 hover:bg-purple-700 text-white'
+            }`}
+          >
+            {isRetroTheme 
+              ? '[[ 🔍 DATA DETECTIVE ]]'
+              : '🔍 Data Detective'
             }
           </button>
         </div>

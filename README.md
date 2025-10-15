@@ -10,6 +10,20 @@ An interactive educational platform that visualizes SQL query execution step-by-
 - **Hint System** to help when you're stuck
 - **Dual Modes**: Free exploration or guided learning
 
+### 🔍 Data Detective - SQL Mystery Game
+- **Immersive narrative experience** - Solve a 1988 corporate sabotage case
+- **Progressive investigation** through 6 stages using SQL queries
+- **Real detective work** - Analyze logs, cross-reference data, find motives
+- **Visual progress tracking** - See completion percentage and stage progress
+- **Table preview system** - View sample data from any table instantly
+- **Example query helpers** - Get hints or load query templates when stuck
+- **Query history tracking** - Review your investigation attempts
+- **SQL quick reference** - Built-in cheat sheet for common patterns
+- **Clue Board** - Unlock and track evidence as you progress
+- **Learn by doing** - Master JOINs, filtering, aggregation through problem-solving
+- See [DATA_DETECTIVE_GUIDE.md](DATA_DETECTIVE_GUIDE.md) for full details
+- See [DETECTIVE_FEATURES.md](DETECTIVE_FEATURES.md) for new feature guide
+
 ### 🔍 Query Visualization
 - **Step-by-step execution** showing intermediate results at each stage:
   - FROM/JOIN - Initial dataset or table combinations
@@ -139,9 +153,26 @@ Frontend will open automatically on **http://localhost:3000**
 6. Review **tips** for code quality
 7. Check **complexity score** to track difficulty
 
+### Data Detective Mode (Mystery Game)
+
+1. Click **"🔍 Data Detective"** button in the header
+2. Read the case briefing - 1988 corporate sabotage investigation
+3. Review the database schema (4 tables with evidence)
+4. Click **"► BEGIN INVESTIGATION"**
+5. For each stage:
+   - Read the narrative and objective
+   - Write SQL queries to uncover clues
+   - Unlock evidence on the Clue Board
+   - Progress through 6 stages to solve the mystery
+6. Complete the investigation by identifying the culprit!
+
+See [DATA_DETECTIVE_GUIDE.md](DATA_DETECTIVE_GUIDE.md) for walkthrough and solutions.
+
 ## 📊 Database Schema
 
-### `employees` Table
+### Main Database (`employees.db`)
+
+#### `employees` Table
 | Column | Type | Description |
 |--------|------|-------------|
 | id | INTEGER | Primary Key |
@@ -172,6 +203,17 @@ Engineering | New York
 Sales       | London
 HR          | New York
 ```
+
+### Case Database (`omnicorp_case.db`)
+
+Used in Data Detective mode. Contains 4 interconnected tables with investigation data:
+
+#### `employees` - Personnel records with security clearances
+#### `security_logs` - Physical access logs (who, where, when)
+#### `file_changelogs` - File system modification history
+#### `memos` - Company communications revealing motives
+
+See [DATA_DETECTIVE_GUIDE.md](DATA_DETECTIVE_GUIDE.md) for complete schema details.
 
 ## 💻 Technology Stack
 
@@ -312,6 +354,8 @@ sql-visualizer/
 │   ├── linter.py              # SQL analysis and best practices checker
 │   ├── curriculum.json        # 14 lessons across 4 modules
 │   ├── employees.db           # SQLite database with sample data
+│   ├── omnicorp_case.db       # Case database for Data Detective mode
+│   ├── case_file.json         # Mystery case configuration & validation
 │   └── requirements.txt       # Python dependencies (Flask, sqlglot, etc.)
 │
 ├── frontend/
@@ -324,7 +368,8 @@ sql-visualizer/
 │   │   │   ├── ResultsTable.js      # Query results table
 │   │   │   ├── TipsPanel.js         # Linter tips & complexity score
 │   │   │   ├── LessonsSidebar.js    # Curriculum navigation
-│   │   │   └── LessonPanel.js       # Lesson details & hints
+│   │   │   ├── LessonPanel.js       # Lesson details & hints
+│   │   │   └── DataDetective.js     # Mystery game interface
 │   │   ├── App.js             # Main React component
 │   │   ├── App.css            # Styling
 │   │   └── index.js           # React entry point
@@ -333,7 +378,8 @@ sql-visualizer/
 │
 ├── start.sh                   # Linux/Mac startup script
 ├── start.bat                  # Windows startup script
-└── README.md                  # This file
+├── README.md                  # This file
+└── DATA_DETECTIVE_GUIDE.md    # Mystery game walkthrough & guide
 ```
 
 ## 🔌 API Endpoints
@@ -344,6 +390,9 @@ sql-visualizer/
 | `/api/validate` | POST | Validate user query against lesson solution |
 | `/api/schema` | GET | Return database schema (tables and columns) |
 | `/api/curriculum` | GET | Return complete lesson curriculum |
+| `/api/case/load` | GET | Load Data Detective case configuration |
+| `/api/case/schema` | GET | Return case database schema |
+| `/api/case/solve` | POST | Validate query against current mystery stage |
 
 ## 🔧 Troubleshooting
 
@@ -441,6 +490,7 @@ Potential additions to make this even better:
 
 - [ ] User progress tracking and analytics
 - [ ] Achievement badges system
+- [ ] More Data Detective cases with different mysteries
 - [ ] More lessons on window functions, CTEs, subqueries
 - [ ] Export results to CSV/JSON
 - [ ] Query performance metrics and EXPLAIN plans
@@ -449,6 +499,7 @@ Potential additions to make this even better:
 - [ ] User accounts and saved queries
 - [ ] Real-time collaboration mode
 - [ ] Mobile-responsive design improvements
+- [ ] Difficulty levels for Data Detective (beginner/advanced cases)
 
 ## 🤝 Contributing
 
