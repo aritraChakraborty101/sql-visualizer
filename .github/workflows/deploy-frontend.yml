@@ -44,7 +44,7 @@ jobs:
         env:
           # Set your PythonAnywhere URL here as a GitHub secret
           # or directly here (not recommended for sensitive data)
-          REACT_APP_API_URL: ${{ secrets.PYTHONANYWHERE_URL || 'https://yourusername.pythonanywhere.com' }}
+          REACT_APP_API_URL: ${{ secrets.PYTHONANYWHERE_URL || 'https://significantbug.pythonanywhere.com' }}
         run: npm run build
       
       - name: Upload artifact
