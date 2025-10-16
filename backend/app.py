@@ -15,7 +15,7 @@ app = Flask(__name__)
 cors_origins = [
     "http://localhost:3000",  # Local React development
     "http://127.0.0.1:3000",  # Alternative local address
-    "https://*.github.io",    # GitHub Pages (all repos)
+    "https://aritrachakraborty101.github.io/sql-visualizer/",    # GitHub Pages (all repos)
 ]
 
 # Add your specific GitHub Pages URL for better security (recommended)
