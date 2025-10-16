@@ -8,6 +8,7 @@ import TipsPanel from './components/TipsPanel';
 import LessonsSidebar from './components/LessonsSidebar';
 import LessonPanel from './components/LessonPanel';
 import DataDetective from './components/DataDetective';
+import Footer from './components/Footer';
 
 function App() {
   const [query, setQuery] = useState('SELECT * FROM employees');
@@ -334,6 +335,8 @@ function App() {
           </div>
         )}
       </div>
+      
+      <Footer isRetroTheme={isRetroTheme} />
     </div>
   );
 }

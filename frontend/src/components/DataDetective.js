@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SqlEditor from './SqlEditor';
 import ResultsTable from './ResultsTable';
+import Footer from './Footer';
+import './DetectiveAnimations.css';
 
 const DataDetective = ({ theme, onExit }) => {
   const [caseData, setCaseData] = useState(null);
@@ -18,13 +20,100 @@ const DataDetective = ({ theme, onExit }) => {
   const [tablePreview, setTablePreview] = useState(null);
   const [showTablePreview, setShowTablePreview] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
+  
+  // Animation states
+  const [showClueReveal, setShowClueReveal] = useState(false);
+  const [revealingClue, setRevealingClue] = useState(null);
+  const [showError, setShowError] = useState(false);
+  const [narrativeTransition, setNarrativeTransition] = useState(false);
+  const [showCaseClosedStamp, setShowCaseClosedStamp] = useState(false);
+  const [skipAnimation, setSkipAnimation] = useState(false);
+  const [clueNotification, setClueNotification] = useState(null);
+  
+  const narrativeRef = useRef(null);
+  const audioContextRef = useRef(null);
 
   const isRetroTheme = theme !== 'normal';
 
   useEffect(() => {
     loadCase();
     loadCaseSchema();
+    
+    // Listen for skip animation key press
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        setSkipAnimation(true);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
+
+  // Sound effects using Web Audio API
+  const playSound = (type) => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const ctx = audioContextRef.current;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    switch(type) {
+      case 'success':
+        // Success chime - ascending notes
+        oscillator.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+        break;
+        
+      case 'error':
+        // Error buzz - harsh low frequency
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(100, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.2);
+        break;
+        
+      case 'clue':
+        // Clue unlock - mysterious tone
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5);
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.5);
+        break;
+        
+      case 'stamp':
+        // Case closed stamp - thud sound
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(80, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+        break;
+        
+      default:
+        oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+    }
+  };
 
   const loadCase = async () => {
     try {
@@ -93,6 +182,7 @@ const DataDetective = ({ theme, onExit }) => {
   const handleQueryExecute = async (userQuery) => {
     setSolving(true);
     setFeedback('');
+    setShowError(false);
     
     // Add to history
     setQueryHistory([...queryHistory, { query: userQuery, timestamp: new Date().toLocaleTimeString() }]);
@@ -124,35 +214,71 @@ const DataDetective = ({ theme, onExit }) => {
       
       // Show results even if incorrect for learning
       if (result.is_correct) {
+        // SUCCESS ANIMATION SEQUENCE
+        playSound('success');
         setFeedback(`✓ ${result.feedback}`);
         
-        // Unlock clue
+        // Unlock clue with animation
         if (result.clue_unlocked) {
-          setCluesUnlocked([...cluesUnlocked, result.clue_unlocked]);
+          playSound('clue');
+          setRevealingClue(result.clue_unlocked);
+          setShowClueReveal(true);
+          
+          // Show notification
+          setClueNotification(result.clue_unlocked);
+          setTimeout(() => setClueNotification(null), 3000);
+          
+          const animationDuration = skipAnimation ? 0 : 2000;
+          
+          setTimeout(() => {
+            setCluesUnlocked([...cluesUnlocked, result.clue_unlocked]);
+            setShowClueReveal(false);
+            setRevealingClue(null);
+            setSkipAnimation(false);
+          }, animationDuration);
         }
         
         // Move to next stage or show completion
         if (result.next_stage) {
+          const transitionDelay = skipAnimation ? 500 : 2500;
+          
           setTimeout(() => {
-            setCurrentStage(result.next_stage);
-            setNarrative(caseData.stages[result.next_stage].narrative);
-            setFeedback('');
-            setQueryResults(null);
-            setQuery('');
-            setShowExampleQuery(false);
-          }, 2500);
+            setNarrativeTransition(true);
+            
+            setTimeout(() => {
+              setCurrentStage(result.next_stage);
+              setNarrative(caseData.stages[result.next_stage].narrative);
+              setFeedback('');
+              setQueryResults(null);
+              setQuery('');
+              setShowExampleQuery(false);
+              setNarrativeTransition(false);
+            }, skipAnimation ? 0 : 800);
+          }, transitionDelay);
         } else if (result.completion_message) {
+          const completionDelay = skipAnimation ? 500 : 2500;
+          
           setTimeout(() => {
             setNarrative(result.completion_message);
             setFeedback('');
-          }, 2500);
+            setShowCaseClosedStamp(true);
+            playSound('stamp');
+          }, completionDelay);
         }
       } else {
+        // FAILURE ANIMATION
+        playSound('error');
+        setShowError(true);
         setFeedback(`✗ ${result.feedback}`);
+        
+        setTimeout(() => setShowError(false), 500);
       }
       
     } catch (error) {
+      playSound('error');
+      setShowError(true);
       setFeedback(`Error: ${error.message}`);
+      setTimeout(() => setShowError(false), 500);
     } finally {
       setSolving(false);
     }
@@ -302,9 +428,9 @@ const DataDetective = ({ theme, onExit }) => {
               </div>
             </div>
 
-            <div className="border-2 border-current p-4 mb-4 bg-opacity-20">
-              <div className="text-lg font-bold mb-2">{stage?.title}</div>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed mb-3">
+            <div className={`border-2 border-current p-4 mb-4 bg-opacity-20 ${narrativeTransition ? 'screen-wipe' : ''}`}>
+              <div className="text-lg font-bold mb-2 message-header">{stage?.title}</div>
+              <div className={`whitespace-pre-wrap text-sm leading-relaxed mb-3 ${narrativeTransition ? 'message-scroll-out' : 'message-scroll-in'}`} ref={narrativeRef}>
                 {narrative}
               </div>
               {stage?.objective && (
@@ -363,10 +489,20 @@ const DataDetective = ({ theme, onExit }) => {
             )}
 
             {feedback && (
-              <div className={`border-2 p-3 mb-4 ${
-                feedback.startsWith('✓') ? 'border-current' : 'border-current opacity-75'
-              }`}>
-                <div className="font-mono">{feedback}</div>
+              <div className={`border-2 p-3 mb-4 relative ${
+                feedback.startsWith('✓') 
+                  ? 'border-current success-flash access-granted' 
+                  : 'border-current access-denied error-buzz'
+              } ${showError ? 'digital-static screen-glitch' : ''}`}>
+                <div className="font-mono relative z-20">
+                  {feedback.startsWith('✓') && (
+                    <div className="text-xs opacity-75 mb-1">&gt; QUERY HASH MATCH... ACCESS GRANTED</div>
+                  )}
+                  {feedback.startsWith('✗') && (
+                    <div className="text-xs opacity-75 mb-1 animate-pulse">&gt; ACCESS DENIED</div>
+                  )}
+                  {feedback}
+                </div>
               </div>
             )}
           </div>
@@ -416,8 +552,31 @@ const DataDetective = ({ theme, onExit }) => {
         {/* Right Panel - Case File & Clue Board */}
         <div className="flex flex-col space-y-4">
           {/* Clue Board */}
-          <div className="crt-container p-4">
+          <div className="crt-container p-4 relative">
             <div className="text-xl font-bold mb-4 text-glow">📋 CLUE BOARD</div>
+            
+            {/* Clue Reveal Animation Overlay */}
+            {showClueReveal && revealingClue && (
+              <div className="absolute inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-6 border-4 border-current">
+                <div className="text-center">
+                  <div className="text-sm mb-4 opacity-75">&gt; EVIDENCE FOUND... PRINTING...</div>
+                  <div className="border-4 border-current p-6 polaroid-print">
+                    <div className="polaroid-develop">
+                      <div className="text-xs mb-2 opacity-50">╔═══════════════════╗</div>
+                      <div className="text-lg font-bold mb-3 clue-decrypt">NEW CLUE UNLOCKED</div>
+                      <div className="text-sm leading-relaxed clue-reveal-animation">
+                        {revealingClue}
+                      </div>
+                      <div className="text-xs mt-2 opacity-50">╚═══════════════════╝</div>
+                    </div>
+                  </div>
+                  <div className="text-xs mt-4 opacity-50 skip-animation-hint">
+                    Press ENTER or SPACE to skip
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-2">
               {cluesUnlocked.length === 0 ? (
                 <div className="text-sm opacity-50 italic">No clues discovered yet...</div>
@@ -425,8 +584,8 @@ const DataDetective = ({ theme, onExit }) => {
                 cluesUnlocked.map((clue, index) => (
                   <div 
                     key={index} 
-                    className="border border-current p-2 text-sm animate-pulse"
-                    style={{ animationDuration: '2s' }}
+                    className="border border-current p-2 text-sm evidence-glow slide-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="font-bold">CLUE #{index + 1}</div>
                     <div className="mt-1">{clue}</div>
@@ -434,6 +593,18 @@ const DataDetective = ({ theme, onExit }) => {
                 ))
               )}
             </div>
+            
+            {/* Case Closed Stamp */}
+            {showCaseClosedStamp && isCaseClosed && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+                <div className="case-closed-stamp stamp-impact text-6xl font-bold transform -rotate-12 opacity-90">
+                  <div className="border-8 border-current px-8 py-4 bg-black">
+                    <div className="text-glow">CASE</div>
+                    <div className="text-glow">CLOSED</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* SQL Quick Reference */}
@@ -493,8 +664,8 @@ JOIN t2
 
           {/* Table Preview Modal */}
           {showTablePreview && tablePreview && (
-            <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-              <div className="crt-container p-6 max-w-4xl w-full max-h-[80vh] overflow-auto">
+            <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 fade-in">
+              <div className="crt-container p-6 max-w-4xl w-full max-h-[80vh] overflow-auto slide-up">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold">TABLE: {tablePreview.name}</h3>
                   <button
@@ -520,6 +691,25 @@ JOIN t2
           )}
         </div>
       </div>
+      
+      {/* Clue Notification Toast */}
+      {clueNotification && (
+        <div className="fixed top-20 right-4 z-50 clue-notification">
+          <div className="crt-container p-4 border-4 border-current min-w-[300px]">
+            <div className="text-sm font-bold mb-2 text-glow">🔍 NEW CLUE DISCOVERED!</div>
+            <div className="text-xs opacity-75">{clueNotification.substring(0, 50)}...</div>
+          </div>
+        </div>
+      )}
+      
+      {/* Skip Animation Hint */}
+      {(showClueReveal || narrativeTransition) && (
+        <div className="skip-animation-hint">
+          Press ENTER or SPACE to skip animation
+        </div>
+      )}
+      
+      <Footer isRetroTheme={isRetroTheme} />
     </div>
   );
 };

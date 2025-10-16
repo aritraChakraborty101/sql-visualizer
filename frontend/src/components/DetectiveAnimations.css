@@ -1,0 +1,697 @@
+/* ===================================
+   DATA DETECTIVE ANIMATIONS
+   Narrative-driven, retro-themed animations
+   =================================== */
+
+/* ===================================
+   1. CLUE REVEAL ANIMATIONS
+   =================================== */
+
+/* Data Packet Animation - Main clue reveal */
+@keyframes dataPacketGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px var(--terminal-glow), inset 0 0 5px var(--terminal-glow);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px var(--terminal-glow), inset 0 0 10px var(--terminal-glow);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes binaryStream {
+  0% { 
+    content: '01001010'; 
+    opacity: 0.3;
+  }
+  25% { 
+    content: '11010011'; 
+    opacity: 0.7;
+  }
+  50% { 
+    content: '00110101'; 
+    opacity: 1;
+  }
+  75% { 
+    content: '10101100'; 
+    opacity: 0.7;
+  }
+  100% { 
+    content: '01110010'; 
+    opacity: 0.3;
+  }
+}
+
+@keyframes clueTransmission {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px) scale(0.5);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes clueDecryption {
+  0%, 20% { content: '█████████████'; }
+  25% { content: '▓▓▓▓▓▓▓▓▓▓▓▓▓'; }
+  30% { content: '▒▒▒▒▒▒▒▒▒▒▒▒▒'; }
+  35% { content: '░░░░░░░░░░░░░'; }
+  40% { content: 'DECRYPTING...'; }
+  50% { content: 'D3CRY9T1NG...'; }
+  60% { content: 'DEC#YPT!NG...'; }
+  70% { content: 'DECRYPTING...'; }
+  80% { content: 'DECRYPT1NG...'; }
+  100% { content: 'COMPLETE'; }
+}
+
+.clue-reveal-animation {
+  animation: clueTransmission 1.5s ease-out forwards;
+}
+
+.clue-decrypt::before {
+  content: 'DECRYPTING...';
+  animation: clueDecryption 2s steps(1) forwards;
+  display: inline-block;
+  margin-right: 0.5em;
+}
+
+.evidence-glow {
+  animation: dataPacketGlow 2s ease-in-out infinite;
+}
+
+/* Polaroid Develop Animation */
+@keyframes polaroidPrint {
+  0% { 
+    height: 0;
+    opacity: 0;
+  }
+  100% { 
+    height: 100%;
+    opacity: 1;
+  }
+}
+
+@keyframes polaroidDevelop {
+  0% { 
+    filter: brightness(0.1) contrast(0.5);
+    opacity: 0.3;
+  }
+  50% {
+    filter: brightness(0.5) contrast(0.8);
+    opacity: 0.6;
+  }
+  100% { 
+    filter: brightness(1) contrast(1);
+    opacity: 1;
+  }
+}
+
+.polaroid-print {
+  animation: polaroidPrint 0.5s ease-out forwards;
+}
+
+.polaroid-develop {
+  animation: polaroidDevelop 3s ease-in-out forwards;
+}
+
+/* ===================================
+   2. SUCCESS/FAILURE FEEDBACK
+   =================================== */
+
+/* Success Confirmation */
+@keyframes successFlash {
+  0%, 100% { 
+    border-color: var(--terminal-border);
+    box-shadow: 0 0 5px var(--terminal-glow);
+  }
+  25%, 75% { 
+    border-color: transparent;
+    box-shadow: 0 0 30px var(--terminal-glow);
+  }
+  50% { 
+    border-color: var(--terminal-border);
+    box-shadow: 0 0 50px var(--terminal-glow);
+  }
+}
+
+.success-flash {
+  animation: successFlash 0.6s ease-in-out 3;
+}
+
+@keyframes accessGranted {
+  0% { 
+    opacity: 0;
+    transform: scale(0.5) rotate(-5deg);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.access-granted {
+  animation: accessGranted 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Failure/Error Animations */
+@keyframes screenGlitch {
+  0%, 100% { 
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  10% { 
+    transform: translate(-5px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  20% { 
+    transform: translate(5px, -2px);
+    filter: hue-rotate(-90deg);
+  }
+  30% { 
+    transform: translate(-2px, 5px);
+    filter: hue-rotate(45deg);
+  }
+  40% { 
+    transform: translate(2px, -5px);
+    filter: hue-rotate(-45deg);
+  }
+  50% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+}
+
+@keyframes digitalStatic {
+  0%, 100% { 
+    opacity: 0;
+  }
+  10%, 30%, 50%, 70%, 90% { 
+    opacity: 0.8;
+    background-position: 0 0;
+  }
+  20%, 40%, 60%, 80% { 
+    opacity: 0;
+    background-position: 50px 50px;
+  }
+}
+
+@keyframes accessDeniedShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.screen-glitch {
+  animation: screenGlitch 0.3s ease-in-out;
+}
+
+.digital-static::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0px, transparent 2px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0px, transparent 2px);
+  background-size: 4px 4px;
+  pointer-events: none;
+  animation: digitalStatic 0.5s steps(8);
+  z-index: 100;
+}
+
+.access-denied {
+  animation: accessDeniedShake 0.5s ease-in-out;
+}
+
+@keyframes errorBuzz {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.error-buzz {
+  animation: errorBuzz 0.1s ease-in-out 5;
+}
+
+/* ===================================
+   3. NARRATIVE TRANSITIONS
+   =================================== */
+
+/* Screen Wipe/Refocus Effect */
+@keyframes screenWipe {
+  0% { 
+    clip-path: inset(0 0 100% 0);
+  }
+  100% { 
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes scanLineWipe {
+  0% { 
+    transform: translateY(-100%);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.screen-wipe {
+  animation: screenWipe 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+.scan-line-wipe::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(to bottom, 
+    transparent, 
+    var(--terminal-text) 50%, 
+    transparent
+  );
+  box-shadow: 0 0 20px var(--terminal-glow);
+  animation: scanLineWipe 1s ease-out;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Incoming Message Animation */
+@keyframes messageScrollUp {
+  0% { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes messageScrollIn {
+  0% { 
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes typewriterEffect {
+  from { 
+    width: 0;
+  }
+  to { 
+    width: 100%;
+  }
+}
+
+.message-scroll-out {
+  animation: messageScrollUp 0.6s ease-in forwards;
+}
+
+.message-scroll-in {
+  animation: messageScrollIn 0.6s ease-out forwards;
+}
+
+.typewriter-text {
+  overflow: hidden;
+  border-right: 0.15em solid var(--terminal-text);
+  white-space: nowrap;
+  animation: 
+    typewriterEffect 2s steps(40, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--terminal-text); }
+}
+
+/* Message Header Effect */
+@keyframes messageHeader {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.message-header {
+  animation: messageHeader 0.3s ease-out;
+}
+
+/* ===================================
+   4. CASE CLOSED / FINALE ANIMATIONS
+   =================================== */
+
+/* Connecting the Dots */
+@keyframes drawLine {
+  0% { 
+    stroke-dashoffset: 1000;
+  }
+  100% { 
+    stroke-dashoffset: 0;
+  }
+}
+
+.connect-dots-line {
+  stroke-dasharray: 1000;
+  animation: drawLine 1.5s ease-in-out forwards;
+}
+
+@keyframes dotPulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
+}
+
+.connection-dot {
+  animation: dotPulse 1s ease-in-out infinite;
+}
+
+/* Case Closed Stamp Animation */
+@keyframes stampFlyIn {
+  0% {
+    transform: translateY(-200px) rotate(-45deg) scale(3);
+    opacity: 0;
+  }
+  70% {
+    transform: translateY(10px) rotate(5deg) scale(0.95);
+    opacity: 1;
+  }
+  85% {
+    transform: translateY(-5px) rotate(-2deg) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes stampImpact {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  10% { 
+    transform: scale(1.1);
+  }
+  20% { 
+    transform: scale(0.95);
+  }
+  30% { 
+    transform: scale(1.02);
+  }
+  40% { 
+    transform: scale(1);
+  }
+}
+
+.case-closed-stamp {
+  animation: stampFlyIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.stamp-impact {
+  animation: stampImpact 0.5s ease-out 1s;
+}
+
+/* Final Report Scroll */
+@keyframes reportScroll {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.final-report-scroll {
+  animation: reportScroll 10s linear;
+}
+
+@keyframes reportReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.report-section {
+  animation: reportReveal 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.report-section:nth-child(1) { animation-delay: 0s; }
+.report-section:nth-child(2) { animation-delay: 0.2s; }
+.report-section:nth-child(3) { animation-delay: 0.4s; }
+.report-section:nth-child(4) { animation-delay: 0.6s; }
+.report-section:nth-child(5) { animation-delay: 0.8s; }
+
+/* ===================================
+   5. INVESTIGATION PROGRESS ANIMATIONS
+   =================================== */
+
+@keyframes progressFill {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: var(--progress-width);
+  }
+}
+
+.progress-bar-fill {
+  animation: progressFill 1s ease-out forwards;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--terminal-glow);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--terminal-glow);
+  }
+}
+
+.progress-bar-active {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* ===================================
+   6. QUERY RESULT HIGHLIGHTING
+   =================================== */
+
+@keyframes highlightRow {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(var(--terminal-text-rgb, 0, 255, 0), 0.2);
+  }
+}
+
+.highlight-evidence-row {
+  animation: highlightRow 1s ease-in-out 3;
+}
+
+@keyframes extractData {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+    color: var(--terminal-text);
+    text-shadow: 0 0 10px var(--terminal-glow);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateX(500px);
+  }
+}
+
+.extract-data-animation {
+  animation: extractData 1.5s ease-in-out forwards;
+}
+
+/* ===================================
+   7. LOADING & PROCESSING STATES
+   =================================== */
+
+@keyframes processingDots {
+  0% { content: 'PROCESSING'; }
+  25% { content: 'PROCESSING.'; }
+  50% { content: 'PROCESSING..'; }
+  75% { content: 'PROCESSING...'; }
+  100% { content: 'PROCESSING'; }
+}
+
+.processing-indicator::after {
+  content: 'PROCESSING';
+  animation: processingDots 1.5s infinite;
+}
+
+@keyframes dataLoad {
+  0% { 
+    content: '▱▱▱▱▱▱▱▱▱▱';
+  }
+  10% { 
+    content: '▰▱▱▱▱▱▱▱▱▱';
+  }
+  20% { 
+    content: '▰▰▱▱▱▱▱▱▱▱';
+  }
+  30% { 
+    content: '▰▰▰▱▱▱▱▱▱▱';
+  }
+  40% { 
+    content: '▰▰▰▰▱▱▱▱▱▱';
+  }
+  50% { 
+    content: '▰▰▰▰▰▱▱▱▱▱';
+  }
+  60% { 
+    content: '▰▰▰▰▰▰▱▱▱▱';
+  }
+  70% { 
+    content: '▰▰▰▰▰▰▰▱▱▱';
+  }
+  80% { 
+    content: '▰▰▰▰▰▰▰▰▱▱';
+  }
+  90% { 
+    content: '▰▰▰▰▰▰▰▰▰▱';
+  }
+  100% { 
+    content: '▰▰▰▰▰▰▰▰▰▰';
+  }
+}
+
+.loading-bar::after {
+  content: '▱▱▱▱▱▱▱▱▱▱';
+  animation: dataLoad 2s ease-in-out infinite;
+  font-family: monospace;
+}
+
+/* ===================================
+   8. HOVER & INTERACTION EFFECTS
+   =================================== */
+
+@keyframes buttonHover {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--terminal-glow);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--terminal-glow);
+  }
+}
+
+.detective-button:hover {
+  animation: buttonHover 0.5s ease-in-out;
+}
+
+/* Clue unlock notification */
+@keyframes clueNotification {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  10%, 90% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.clue-notification {
+  animation: clueNotification 3s ease-in-out forwards;
+}
+
+/* ===================================
+   9. UTILITY ANIMATIONS
+   =================================== */
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Skip animation hint */
+@keyframes skipHint {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.skip-animation-hint {
+  animation: skipHint 2s ease-in-out infinite;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--terminal-border);
+  z-index: 1000;
+}
