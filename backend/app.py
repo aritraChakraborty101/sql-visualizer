@@ -11,22 +11,18 @@ from linter import analyze_query, get_query_complexity_score
 app = Flask(__name__)
 
 # Configure CORS - allows both local development and production
-# Update the GitHub Pages URL with your actual username before deploying
 cors_origins = [
     "http://localhost:3000",  # Local React development
     "http://127.0.0.1:3000",  # Alternative local address
-    "https://aritrachakraborty101.github.io/sql-visualizer/",    # GitHub Pages (all repos)
+    "https://aritrachakraborty101.github.io",  # GitHub Pages (without trailing slash)
 ]
-
-# Add your specific GitHub Pages URL for better security (recommended)
-# Uncomment and update before deploying:
-# cors_origins.append("https://yourusername.github.io")
 
 CORS(app, resources={
     r"/api/*": {
         "origins": cors_origins,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": False
     }
 })
 
