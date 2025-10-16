@@ -16,7 +16,7 @@ function App() {
   const [results, setResults] = useState(null);
   const [visualizationSteps, setVisualizationSteps] = useState([]);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  
   const [tips, setTips] = useState([]);
   const [complexity, setComplexity] = useState(null);
   
@@ -31,7 +31,7 @@ function App() {
 
   // Theme state
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('sqlVisTheme') || 'green-phosphor';
+    return localStorage.getItem('sqlVisTheme') || 'normal';
   });
 
   // Apply theme to document
