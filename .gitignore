@@ -64,6 +64,11 @@ coverage/
 .env.test.local
 .env.production.local
 
+# Keep example files
+!.env.example
+!frontend/.env.development
+!frontend/.env.production
+
 # OS
 .DS_Store
 Thumbs.db

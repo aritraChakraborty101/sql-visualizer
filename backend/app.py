@@ -5,10 +5,30 @@ import sqlglot
 from sqlglot import exp
 from typing import List, Dict, Any, Optional
 import json
+import os
 from linter import analyze_query, get_query_complexity_score
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS - allows both local development and production
+# Update the GitHub Pages URL with your actual username before deploying
+cors_origins = [
+    "http://localhost:3000",  # Local React development
+    "http://127.0.0.1:3000",  # Alternative local address
+    "https://*.github.io",    # GitHub Pages (all repos)
+]
+
+# Add your specific GitHub Pages URL for better security (recommended)
+# Uncomment and update before deploying:
+# cors_origins.append("https://yourusername.github.io")
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": cors_origins,
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 DATABASE = 'employees.db'
 CASE_DATABASE = 'omnicorp_case.db'

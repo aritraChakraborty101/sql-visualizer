@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SqlEditor from './SqlEditor';
 import ResultsTable from './ResultsTable';
 import Footer from './Footer';
+import API_URL from '../config';
 import './DetectiveAnimations.css';
 
 const DataDetective = ({ theme, onExit }) => {
@@ -117,7 +118,7 @@ const DataDetective = ({ theme, onExit }) => {
 
   const loadCase = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/case/load');
+      const response = await fetch(`${API_URL}/api/case/load`);
       const data = await response.json();
       setCaseData(data);
       setNarrative(data.intro_narrative);
@@ -130,7 +131,7 @@ const DataDetective = ({ theme, onExit }) => {
 
   const loadCaseSchema = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/case/schema');
+      const response = await fetch(`${API_URL}/api/case/schema`);
       const schema = await response.json();
       setCaseSchema(schema);
     } catch (error) {
@@ -146,7 +147,7 @@ const DataDetective = ({ theme, onExit }) => {
 
   const previewTable = async (tableName) => {
     try {
-      const response = await fetch('http://localhost:5000/api/query', {
+      const response = await fetch(`${API_URL}/api/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: `SELECT * FROM ${tableName} LIMIT 5` })
@@ -189,7 +190,7 @@ const DataDetective = ({ theme, onExit }) => {
     
     try {
       // First execute the query to get results for display
-      const queryResponse = await fetch('http://localhost:5000/api/query', {
+      const queryResponse = await fetch(`${API_URL}/api/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userQuery })
@@ -201,7 +202,7 @@ const DataDetective = ({ theme, onExit }) => {
       }
 
       // Then validate against the case stage
-      const response = await fetch('http://localhost:5000/api/case/solve', {
+      const response = await fetch(`${API_URL}/api/case/solve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

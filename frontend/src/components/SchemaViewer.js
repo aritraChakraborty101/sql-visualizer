@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_URL from '../config';
 
 const SchemaViewer = ({ isRetroTheme = true }) => {
   const [schema, setSchema] = useState(null);
@@ -11,7 +12,7 @@ const SchemaViewer = ({ isRetroTheme = true }) => {
 
   const fetchSchema = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/schema');
+      const response = await fetch(`${API_URL}/api/schema`);
       const data = await response.json();
       
       if (response.ok) {

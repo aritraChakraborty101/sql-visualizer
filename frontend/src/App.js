@@ -9,6 +9,7 @@ import LessonsSidebar from './components/LessonsSidebar';
 import LessonPanel from './components/LessonPanel';
 import DataDetective from './components/DataDetective';
 import Footer from './components/Footer';
+import API_URL from './config';
 
 function App() {
   const [query, setQuery] = useState('SELECT * FROM employees');
@@ -56,7 +57,7 @@ function App() {
     try {
       // If in lesson mode, validate against the lesson solution
       if (lessonMode && activeLesson) {
-        const validateResponse = await fetch('http://127.0.0.1:5000/api/validate', {
+        const validateResponse = await fetch(`${API_URL}/api/validate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ function App() {
       }
 
       // Execute the query normally to show results and visualization
-      const response = await fetch('http://127.0.0.1:5000/api/query', {
+      const response = await fetch(`${API_URL}/api/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
