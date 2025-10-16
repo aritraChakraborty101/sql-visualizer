@@ -40,10 +40,10 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
   };
 
   return (
-    <div className={isRetroTheme ? "crt-container rounded-lg p-5 relative overflow-hidden" : "bg-white rounded-lg shadow-md p-5"}>
+    <div className={isRetroTheme ? "crt-container rounded-lg p-3 sm:p-5 relative overflow-hidden" : "bg-white rounded-lg shadow-md p-3 sm:p-5"}>
       <h2 className={isRetroTheme 
-        ? "text-xl font-bold mb-4 terminal-text text-glow border-b-2 border-green-500 pb-2 uppercase tracking-wider"
-        : "text-xl font-semibold mb-4 text-secondary border-b-2 border-primary pb-2"
+        ? "text-lg sm:text-xl font-bold mb-3 sm:mb-4 terminal-text text-glow border-b-2 border-green-500 pb-2 uppercase tracking-wider"
+        : "text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-secondary border-b-2 border-primary pb-2"
       }>
         {isRetroTheme ? '>> SQL QUERY EDITOR' : 'SQL Query Editor'}
       </h2>
@@ -62,7 +62,7 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
           theme="vs-dark"
           options={{
             minimap: { enabled: false },
-            fontSize: 14,
+            fontSize: 12,
             lineNumbers: 'on',
             scrollBeyondLastLine: false,
             automaticLayout: true,
@@ -73,13 +73,13 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
           }}
         />
       </div>
-      <div className="flex gap-3 items-center mb-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center mb-3">
         <button 
           onClick={onRun} 
           disabled={loading}
           className={isRetroTheme 
-            ? "terminal-button flex items-center gap-3"
-            : "flex items-center gap-3 bg-primary hover:bg-cyan-400 text-secondary px-6 py-3 rounded font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            ? "terminal-button flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
+            : "flex items-center justify-center gap-2 sm:gap-3 bg-primary hover:bg-cyan-400 text-secondary px-4 sm:px-6 py-2 sm:py-3 rounded font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base"
           }
         >
           <span>{loading ? (isRetroTheme ? 'EXECUTING...' : 'Executing...') : (isRetroTheme ? '[[ RUN QUERY ]]' : 'Run Query')}</span>
@@ -96,12 +96,12 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
       </div>
       
       <div className={isRetroTheme 
-        ? "mt-3 p-3 border border-green-700 rounded bg-black bg-opacity-40"
-        : "mt-3 p-3 bg-gray-50 rounded"
+        ? "mt-3 p-2 sm:p-3 border border-green-700 rounded bg-black bg-opacity-40"
+        : "mt-3 p-2 sm:p-3 bg-gray-50 rounded"
       }>
         <h4 className={isRetroTheme 
-          ? "text-sm mb-2 terminal-text font-bold uppercase tracking-wide"
-          : "text-sm mb-2 text-gray-600 font-semibold"
+          ? "text-xs sm:text-sm mb-2 terminal-text font-bold uppercase tracking-wide"
+          : "text-xs sm:text-sm mb-2 text-gray-600 font-semibold"
         }>
           {isRetroTheme ? '> SAMPLE QUERIES [CLICK TO LOAD]:' : 'Sample Queries (click to load):'}
         </h4>
@@ -111,8 +111,8 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
               key={index} 
               onClick={() => setQuery(q)}
               className={isRetroTheme 
-                ? "block w-full text-left px-3 py-2 border border-green-700 bg-black bg-opacity-60 hover:bg-green-900 hover:bg-opacity-30 hover:border-green-500 transition-all"
-                : "block w-full text-left px-3 py-2 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-primary transition-colors"
+                ? "block w-full text-left px-2 sm:px-3 py-1.5 sm:py-2 border border-green-700 bg-black bg-opacity-60 hover:bg-green-900 hover:bg-opacity-30 hover:border-green-500 transition-all"
+                : "block w-full text-left px-2 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-primary transition-colors"
               }
             >
               <div className={isRetroTheme 
@@ -122,8 +122,8 @@ const SqlEditor = ({ query, setQuery, onRun, loading, isRetroTheme = true }) => 
                 {queryDescriptions[index]}
               </div>
               <div className={isRetroTheme 
-                ? "font-mono text-xs text-green-500 opacity-80"
-                : "font-mono text-xs text-gray-600"
+                ? "font-mono text-xs text-green-500 opacity-80 break-all"
+                : "font-mono text-xs text-gray-600 break-all"
               }>
                 {q}
               </div>

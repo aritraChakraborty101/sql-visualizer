@@ -57,16 +57,16 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
   };
 
   return (
-    <div className={isRetroTheme ? "crt-container rounded-lg p-5 relative overflow-hidden" : "bg-white rounded-lg shadow-md p-5"}>
+    <div className={isRetroTheme ? "crt-container rounded-lg p-3 sm:p-5 relative overflow-hidden" : "bg-white rounded-lg shadow-md p-3 sm:p-5"}>
       <h2 className={isRetroTheme 
-        ? "text-xl font-bold mb-4 terminal-text text-glow border-b-2 border-green-500 pb-2 uppercase tracking-wider"
-        : "text-xl font-semibold mb-4 text-secondary border-b-2 border-primary pb-2"
+        ? "text-lg sm:text-xl font-bold mb-3 sm:mb-4 terminal-text text-glow border-b-2 border-green-500 pb-2 uppercase tracking-wider"
+        : "text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-secondary border-b-2 border-primary pb-2"
       }>
         {isRetroTheme ? '&gt;&gt; FINAL QUERY RESULTS' : `Query Results (${rows.length} ${rows.length === 1 ? 'row' : 'rows'})`}
       </h2>
       
       {isRetroTheme && (
-        <div className="mb-3 terminal-text text-sm">
+        <div className="mb-3 terminal-text text-xs sm:text-sm">
           [RECORDS RETURNED: {rows.length}] 
           {isRevealing && <span className="ml-2 processing-text text-xs"></span>}
         </div>
@@ -76,23 +76,26 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
         <div className="relative">
           {/* ASCII Top Border - Only for retro */}
           {isRetroTheme && (
-            <div className="terminal-text text-xs mb-2 overflow-hidden whitespace-nowrap">
+            <div className="terminal-text text-xs mb-2 overflow-hidden whitespace-nowrap hidden sm:block">
               ╔{generateBorder('═')}╗
             </div>
           )}
 
           <div className={isRetroTheme 
-            ? "overflow-x-auto border-l-2 border-r-2 border-green-500 bg-black bg-opacity-60 p-3"
-            : "overflow-x-auto"
+            ? "overflow-x-auto border-l-2 border-r-2 border-green-500 bg-black bg-opacity-60 p-2 sm:p-3 -mx-3 sm:mx-0"
+            : "overflow-x-auto -mx-3 sm:mx-0"
           }>
-            <table className="w-full border-collapse font-mono text-xs">
+            <table className="w-full border-collapse font-mono text-xs min-w-full">
               <thead className={isRetroTheme ? "bg-black" : "bg-secondary text-white"}>
                 <tr>
                   {columns.map((col, index) => (
                     <th 
                       key={index} 
                       className={isRetroTheme 
-                        ? "py-2 px-3 text-left crt-table-cell font-bold uppercase text-glow border-b-2 border-green-500"
+                        ? "py-2 px-2 sm:px-3 text-left crt-table-cell font-bold uppercase text-glow border-b-2 border-green-500 whitespace-nowrap"
+                        : "py-2 sm:py-2.5 px-2 sm:px-3 text-left border border-gray-300 whitespace-nowrap"
+                      }
+                    >
                         : "py-2.5 px-3 text-left border border-gray-300"
                       }
                     >
@@ -116,7 +119,7 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
                     {row.map((cell, cellIndex) => (
                       <td 
                         key={cellIndex} 
-                        className={isRetroTheme ? "py-2 px-3 crt-table-cell" : "py-2.5 px-3 border border-gray-300"}
+                        className={isRetroTheme ? "py-2 px-2 sm:px-3 crt-table-cell" : "py-2 sm:py-2.5 px-2 sm:px-3 border border-gray-300"}
                       >
                         {cell !== null ? cell : (isRetroTheme ? '<NULL>' : 'NULL')}
                       </td>
@@ -137,7 +140,7 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
 
           {/* ASCII Bottom Border - Only for retro */}
           {isRetroTheme && (
-            <div className="terminal-text text-xs mt-2 overflow-hidden whitespace-nowrap">
+            <div className="terminal-text text-xs mt-2 overflow-hidden whitespace-nowrap hidden sm:block">
               ╚{generateBorder('═')}╝
             </div>
           )}
@@ -148,6 +151,11 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
               [END OF TRANSMISSION] - {rows.length} RECORD{rows.length !== 1 ? 'S' : ''} LOADED
             </div>
           )}
+
+          {/* Mobile scroll hint */}
+          <div className="sm:hidden mt-2 text-center text-xs text-gray-500 italic">
+            ← Swipe to see more →
+          </div>
         </div>
       ) : (
         <div className={isRetroTheme 

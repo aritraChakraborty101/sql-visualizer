@@ -143,33 +143,33 @@ function App() {
 
   return (
     <div className={`min-h-screen ${isRetroTheme ? 'bg-black' : 'bg-gray-100'}`}>
-      <header className={isRetroTheme ? 'terminal-header py-5 px-5 text-center' : 'bg-secondary text-white py-5 px-5 text-center shadow-md'}>
+      <header className={isRetroTheme ? 'terminal-header py-3 sm:py-5 px-3 sm:px-5 text-center' : 'bg-secondary text-white py-3 sm:py-5 px-3 sm:px-5 text-center shadow-md'}>
         {isRetroTheme ? (
           <>
-            <h1 className="text-3xl font-bold text-glow tracking-widest mb-1">
+            <h1 className="text-sm sm:text-2xl md:text-3xl font-bold text-glow tracking-widest mb-1 overflow-x-auto">
               ╔═══════════════════════════════════════════════════╗
             </h1>
-            <h1 className="text-3xl font-bold text-glow tracking-widest">
+            <h1 className="text-sm sm:text-2xl md:text-3xl font-bold text-glow tracking-widest overflow-x-auto">
               ║  SQL QUERY EXECUTION VISUALIZER v1.0  ║
             </h1>
-            <h1 className="text-3xl font-bold text-glow tracking-widest mt-1">
+            <h1 className="text-sm sm:text-2xl md:text-3xl font-bold text-glow tracking-widest mt-1 overflow-x-auto">
               ╚═══════════════════════════════════════════════════╝
             </h1>
           </>
         ) : (
-          <h1 className="text-3xl font-semibold">SQL Query Execution Visualizer</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold">SQL Query Execution Visualizer</h1>
         )}
         
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3">
           {/* Theme Selector */}
-          <div className="flex items-center gap-2">
-            <label className={`text-sm font-bold ${isRetroTheme ? 'terminal-text uppercase tracking-wider' : 'text-gray-700'}`}>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className={`text-xs sm:text-sm font-bold ${isRetroTheme ? 'terminal-text uppercase tracking-wider' : 'text-gray-700'}`}>
               {isRetroTheme ? 'THEME:' : 'Theme:'}
             </label>
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              className={`px-3 py-2 font-bold text-sm transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 isRetroTheme 
                   ? 'terminal-button bg-black' 
                   : 'bg-white text-gray-900 border-2 border-gray-300 rounded hover:border-primary focus:border-primary focus:outline-none'
@@ -186,10 +186,10 @@ function App() {
           {/* Lesson Mode Toggle */}
           <button
             onClick={toggleLessonMode}
-            className={`${
+            className={`w-full sm:w-auto text-xs sm:text-sm ${
               isRetroTheme 
                 ? `terminal-button ${lessonMode ? 'bg-green-500 text-black' : ''}` 
-                : `px-4 py-2 rounded font-semibold transition-colors ${
+                : `px-3 sm:px-4 py-1.5 sm:py-2 rounded font-semibold transition-colors ${
                     lessonMode
                       ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
                       : 'bg-primary hover:bg-cyan-400 text-secondary'
@@ -205,10 +205,10 @@ function App() {
           {/* Data Detective Mode Toggle */}
           <button
             onClick={toggleDetectiveMode}
-            className={`${
+            className={`w-full sm:w-auto text-xs sm:text-sm ${
               isRetroTheme 
                 ? 'terminal-button' 
-                : 'px-4 py-2 rounded font-semibold transition-colors bg-purple-600 hover:bg-purple-700 text-white'
+                : 'px-3 sm:px-4 py-1.5 sm:py-2 rounded font-semibold transition-colors bg-purple-600 hover:bg-purple-700 text-white'
             }`}
           >
             {isRetroTheme 
@@ -225,10 +225,10 @@ function App() {
         )}
       </header>
       
-      <div className="max-w-[1800px] mx-auto p-5">
+      <div className="max-w-[1800px] mx-auto p-3 sm:p-5">
         {lessonMode ? (
           // Lesson Mode Layout
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-5">
             <div className="lg:col-span-1">
               <LessonsSidebar 
                 onLessonSelect={handleLessonSelect}
@@ -238,7 +238,7 @@ function App() {
               />
             </div>
             
-            <div className="lg:col-span-2 space-y-5">
+            <div className="lg:col-span-2 space-y-3 sm:space-y-5">
               {activeLesson && (
                 <LessonPanel
                   lesson={activeLesson}
@@ -303,8 +303,8 @@ function App() {
           </div>
         ) : (
           // Free Query Mode Layout
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-5">
+            <div className="flex flex-col gap-3 sm:gap-5">
               <SchemaViewer isRetroTheme={isRetroTheme} />
               <SqlEditor 
                 query={query} 
@@ -329,7 +329,7 @@ function App() {
               {tips.length > 0 && <TipsPanel tips={tips} complexity={complexity} isRetroTheme={isRetroTheme} />}
             </div>
             
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3 sm:gap-5">
               <Visualization steps={visualizationSteps} isRetroTheme={isRetroTheme} />
               <ResultsTable results={results} isRetroTheme={isRetroTheme} />
             </div>
