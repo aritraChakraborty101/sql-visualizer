@@ -96,9 +96,6 @@ const ResultsTable = ({ results, isRetroTheme = true }) => {
                         : "py-2 sm:py-2.5 px-2 sm:px-3 text-left border border-gray-300 whitespace-nowrap"
                       }
                     >
-                        : "py-2.5 px-3 text-left border border-gray-300"
-                      }
-                    >
                       {col}
                     </th>
                   ))}
